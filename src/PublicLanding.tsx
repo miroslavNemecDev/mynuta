@@ -21,6 +21,9 @@ import zeleninaIcon from './assets/icons/svg-svetle/zelenina.svg'
 import masoIcon from './assets/icons/svg-svetle/maso.svg'
 import napojeIcon from './assets/icons/svg-svetle/napoje.svg'
 import mobilIcon from './assets/icons/svg-svetle/mobil.svg'
+import bagPekarna from './assets/bags/mynuta-taska-papirova/svg/taska-papirova-pekarna.svg'
+import bagSnidane from './assets/bags/mynuta-taska-papirova/svg/taska-papirova-snidane.svg'
+import bagTrh from './assets/bags/mynuta-taska-papirova/svg/taska-papirova-trh.svg'
 
 type DemoItem = { name: string; icon: string }
 type PickupDay = { id: string; date: Date; label: string }
@@ -161,6 +164,9 @@ function PublicLanding() {
   const [interestEmail, setInterestEmail] = useState('')
   const [interestState, setInterestState] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
   const [interestMessage, setInterestMessage] = useState('')
+  const [activeBagIndex] = useState<number>(() => Math.floor(Math.random() * 3))
+
+  const bagVariants = [bagPekarna, bagSnidane, bagTrh]
 
   const pickupDays = getPickupDays()
   const quickPickupDays = pickupDays.slice(0, 2)
@@ -273,10 +279,7 @@ function PublicLanding() {
                 <span className="bag-sun" />
                 <span className="bag-handle" />
                 <div className="bag-shape">
-                  <span className="bag-fold" />
-                  <span className="bag-side" />
-                  <img className="bag-logo" src={publicAsset('mynuta-symbol.svg')} alt="" />
-                  <span className="bag-stamp">PŘIPRAVENO PRO TEBE</span>
+                  <img className="bag-asset" src={bagVariants[activeBagIndex]} alt="" />
                 </div>
               </div>
               <span className="visual-note">Tvůj nákup čeká. Ty ne.</span>
