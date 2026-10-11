@@ -159,7 +159,6 @@ function PublicLanding() {
   const [startedAt, setStartedAt] = useState<number | null>(null)
   const [elapsed, setElapsed] = useState(0)
   const [interestEmail, setInterestEmail] = useState('')
-  const [interestDemo, setInterestDemo] = useState(false)
   const [interestState, setInterestState] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
   const [interestMessage, setInterestMessage] = useState('')
 
@@ -421,13 +420,9 @@ function PublicLanding() {
           <form className="interest-demo" onSubmit={handleInterestSubmit}>
             <span className="demo-badge"><span /> Přihlášení k novinkám</span>
             <label htmlFor="interest-email">Tvůj e-mail</label>
-            <input id="interest-email" type="email" value={interestEmail} onChange={(event) => setInterestEmail(event.target.value)} placeholder="ty@email.cz" disabled={!interestDemo && interestState !== 'success'} aria-describedby="interest-note" required />
+            <input id="interest-email" type="email" value={interestEmail} onChange={(event) => setInterestEmail(event.target.value)} placeholder="ty@email.cz" aria-describedby="interest-note" required />
             <div className="interest-actions">
-              {!interestDemo ? (
-                <button type="button" className="button-primary" onClick={() => setInterestDemo(true)}>Ukázat přihlášení <ArrowRight size={16} /></button>
-              ) : (
-                <button type="submit" className="button-primary" disabled={interestState === 'submitting'}>{interestState === 'submitting' ? 'Odesílám...' : 'Přihlásit se'} <ArrowRight size={16} /></button>
-              )}
+              <button type="submit" className="button-primary" disabled={interestState === 'submitting'}>{interestState === 'submitting' ? 'Odesílám...' : 'Přihlásit se'} <ArrowRight size={16} /></button>
             </div>
             {interestMessage && <small className={`interest-message ${interestState}`}>{interestMessage}</small>}
             <small id="interest-note">Své kontaktní údaje používáme jen k informování o otevření a novinkách z MYNUTA.</small>
