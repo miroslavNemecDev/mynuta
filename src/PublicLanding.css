@@ -26,12 +26,13 @@
 .hero-visual { position: relative; display: flex; min-height: 288px; align-items: center; justify-content: center; }
 .hero-mark { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .hero-bag-art { display: block; width: min(100%, 430px); height: auto; aspect-ratio: 1; object-fit: contain; }
-.bag-asset { display: block; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 16px 18px rgba(24,82,40,.1)); transform: scale(1.25) translate(-16px, -10px); }
+.bag-asset { display: block; width: 100%; height: 100%; object-fit: contain; transform: scale(1.25) translate(-16px, -10px); }
 .visual-note { color: #899489; font-family: Manrope, sans-serif; font-size: 11px; font-weight: 700; text-align: center; }
-.hero-flow { display: grid; grid-column: 1 / -1; grid-template-columns: 1fr 44px 1fr 44px 1fr; align-items: center; gap: 14px; margin: 42px 0 42px; padding: 19px 22px; background: #fff; border: 1px solid #e9ede7; border-radius: 6px; box-shadow: 0 7px 25px rgba(30,59,37,.035); }
+.hero-flow { display: grid; width: min(100%, 960px); grid-column: 1 / -1; grid-template-columns: 1fr 44px 1fr 44px 1fr; align-items: center; justify-self: center; gap: 14px; margin: 42px 0 42px; padding: 19px 12px; background: #fff; border: 1px solid #e9ede7; border-radius: 6px; box-shadow: 0 7px 25px rgba(30,59,37,.035); }
 .flow-step { display: flex; align-items: center; justify-content: center; gap: 12px; }
 .flow-icon { display: grid; width: 45px; height: 45px; flex: 0 0 auto; place-items: center; color: var(--public-green); background: #edf7ec; border-radius: 5px; }
 .flow-icon svg { width: 29px; height: 29px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
+.flow-icon .flow-custom-icon { display: block; width: 39px; height: 39px; object-fit: contain; }
 .flow-step small, .flow-step strong { display: block; }.flow-step small { margin-bottom: 3px; color: #9aa39b; font-size: 9px; font-weight: 700; }.flow-step strong { font-family: Manrope, sans-serif; font-size: 13px; }
 .flow-arrow { display: grid; align-self: center; justify-self: center; place-items: center; color: #9aaf9d; }.flow-arrow svg { display: block; }
 .minute-section { padding: 61px 0 57px; background: #eef4e9; }
@@ -42,6 +43,9 @@
 .minute-events li { min-width: 0; }
 .minute-card { display: grid; min-height: 148px; grid-template-columns: 54px minmax(0, 1fr); align-items: center; gap: 18px; padding: 22px; color: #536259; background: #fff; border: 1px solid #e0e8dc; border-radius: 5px; }
 .minute-card-icon { display: grid; width: 54px; height: 54px; place-items: center; color: var(--public-green); background: #edf7ec; border-radius: 5px; }
+.minute-card-icon .minute-custom-icon { display: block; width: calc(100% - 8px); height: calc(100% - 8px); object-fit: contain; }
+.payment-icon .payment-custom-icon { display: block; width: 28px; height: 28px; object-fit: contain; }
+.code-ticket-icon { display: block; width: 38px; height: 38px; object-fit: contain; }
 .minute-card-number { display: block; color: #d38c16; font-family: Manrope, sans-serif; font-size: 9px; font-weight: 800; }
 .minute-card-title { margin: 8px 0 5px; color: #35463a; font-family: Manrope, sans-serif; font-size: 16px; font-weight: 750; line-height: 1.35; }
 .minute-card-description { margin: 0; color: #718078; font-size: 11px; line-height: 1.5; }
@@ -133,7 +137,7 @@
   .public-header::before { clip-path: polygon(0 0, 100% 0, 100% 50%, calc(50% + 102px) 50%, calc(50% + 98px) 53%, calc(50% + 93px) 59%, calc(50% + 89px) 67%, calc(50% + 86px) 77%, calc(50% + 84px) 89%, calc(50% + 83px) 100%, calc(50% - 82px) 100%, calc(50% - 83px) 89%, calc(50% - 86px) 77%, calc(50% - 89px) 67%, calc(50% - 93px) 59%, calc(50% - 98px) 53%, calc(50% - 102px) 50%, 0 50%); }
   .public-nav .public-nav-cta { width: 38px; height: 38px; justify-content: center; padding: 0; }
   .public-nav-cta-label { display: none; }
-  .hero-visual { opacity: 1; }
-  .hero-bag-art { width: min(100%, 260px); }
+  .hero-visual { position: absolute; top: 58px; right: -42px; z-index: 0; display: flex; width: 230px; height: 230px; min-height: 0; justify-content: center; opacity: .2; pointer-events: none; }
+  .hero-bag-art { width: 100%; margin: 0; }
   .bag-asset { transform: scale(1.2) translate(-7px, -8px); }
 }
