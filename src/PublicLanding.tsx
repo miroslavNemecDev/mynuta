@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import {
   ArrowRight,
   Check,
@@ -158,7 +158,10 @@ function PublicLanding() {
   const [orderCode, setOrderCode] = useState('')
   const [startedAt, setStartedAt] = useState<number | null>(null)
   const [elapsed, setElapsed] = useState(0)
+  const [interestEmail, setInterestEmail] = useState('')
   const [interestDemo, setInterestDemo] = useState(false)
+  const [interestState, setInterestState] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
+  const [interestMessage, setInterestMessage] = useState('')
 
   const pickupDays = getPickupDays()
   const quickPickupDays = pickupDays.slice(0, 2)
@@ -204,6 +207,41 @@ function PublicLanding() {
     setOrderCode('')
     setStartedAt(null)
     setElapsed(0)
+  }
+
+  const handleInterestSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const email = interestEmail.trim()
+    if (!email) {
+      setInterestState('error')
+      setInterestMessage('Zadej prosím e-mail.')
+      return
+    }
+
+    setInterestState('submitting')
+    setInterestMessage('')
+
+    try {
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+
+      const data = await response.json().catch(() => ({}))
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'Přihlášení se nepovedlo odeslat.')
+      }
+
+      setInterestState('success')
+      setInterestMessage('Děkujeme! Přihlášení jsme přijali. Brzy se ozveme.')
+      setInterestEmail('')
+    } catch (error) {
+      setInterestState('error')
+      setInterestMessage(error instanceof Error ? error.message : 'Něco se nepovedlo. Zkus to prosím znovu.')
+    }
   }
 
   const startPickup = () => {
@@ -379,8 +417,21 @@ function PublicLanding() {
         </section>
 
         <section className="interest-section wrap" id="zajemci">
-          <div className="interest-copy"><span className="section-label">POMOZ NÁM ZAČÍT</span><h2>Chceš vědět, až otevřeme?</h2><p>Zjišťujeme, jestli by se ti taková výdejna hodila. Zatím tu ukazujeme, jak bude přihlášení vypadat.</p></div>
-          <div className="interest-demo"><span className="demo-badge"><span /> Ukázka – zatím se nikam neposílá</span><label htmlFor="interest-email">Tvůj e-mail</label><input id="interest-email" type="email" placeholder="ty@email.cz" disabled={!interestDemo} aria-describedby="interest-note" /><button className="button-primary" onClick={() => setInterestDemo(true)}>{interestDemo ? 'Formulář je jen ukázka' : 'Ukázat přihlášení'} <ArrowRight size={16} /></button><small id="interest-note">Tahle ukázka nic neodesílá ani neukládá. Kontaktní formulář doplníme před otevřením.</small></div>
+          <div className="interest-copy"><span className="section-label">POMOZ NÁM ZAČÍT</span><h2>Chceš vědět, až otevřeme?</h2><p>Zjišťujeme, jestli by se ti taková výdejna hodila. Přihlaš se a my tě budeme informovat o otevření.</p></div>
+          <form className="interest-demo" onSubmit={handleInterestSubmit}>
+            <span className="demo-badge"><span /> Přihlášení k novinkám</span>
+            <label htmlFor="interest-email">Tvůj e-mail</label>
+            <input id="interest-email" type="email" value={interestEmail} onChange={(event) => setInterestEmail(event.target.value)} placeholder="ty@email.cz" disabled={!interestDemo && interestState !== 'success'} aria-describedby="interest-note" required />
+            <div className="interest-actions">
+              {!interestDemo ? (
+                <button type="button" className="button-primary" onClick={() => setInterestDemo(true)}>Ukázat přihlášení <ArrowRight size={16} /></button>
+              ) : (
+                <button type="submit" className="button-primary" disabled={interestState === 'submitting'}>{interestState === 'submitting' ? 'Odesílám...' : 'Přihlásit se'} <ArrowRight size={16} /></button>
+              )}
+            </div>
+            {interestMessage && <small className={`interest-message ${interestState}`}>{interestMessage}</small>}
+            <small id="interest-note">Své kontaktní údaje používáme jen k informování o otevření a novinkách z MYNUTA.</small>
+          </form>
         </section>
 
         <section className="faq-section wrap">
