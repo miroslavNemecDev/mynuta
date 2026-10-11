@@ -276,13 +276,8 @@ function PublicLanding() {
           <div className="hero-visual">
             <div className="hero-mark">
               <div className="hero-bag-art" aria-hidden="true">
-                <span className="bag-sun" />
-                <span className="bag-handle" />
-                <div className="bag-shape">
-                  <img className="bag-asset" src={bagVariants[activeBagIndex]} alt="" />
-                </div>
+                <img className="bag-asset" src={bagVariants[activeBagIndex]} alt="" />
               </div>
-              <span className="visual-note">Tvůj nákup čeká. Ty ne.</span>
             </div>
           </div>
           <div className="hero-flow" aria-label="Vyber v mobilu, zaplať online, vyzvedni za minutu">
