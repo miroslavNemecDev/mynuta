@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import {
-  ArrowDown,
   ArrowRight,
   Apple,
   Check,
@@ -15,6 +14,7 @@ import {
   PackageCheck,
   Plus,
   QrCode,
+  Smartphone,
   Wheat,
   type LucideIcon,
 } from 'lucide-react'
@@ -23,6 +23,10 @@ import './PublicLanding.css'
 type DemoItem = { name: string; icon: LucideIcon }
 type PickupDay = { id: string; date: Date; label: string }
 type DemoStage = 'items' | 'time' | 'pay' | 'confirmation' | 'pickup' | 'done'
+
+function publicAsset(filename: string) {
+  return `${import.meta.env.BASE_URL}${filename}`
+}
 
 const demoItems: DemoItem[] = [
   { name: 'Rohlíky', icon: Wheat },
@@ -49,6 +53,19 @@ const categories = [
   ['Základní drogerie', 'Věci pro každý den'],
 ]
 
+const minuteEvents = [
+  {
+    title: 'Ukážeš QR kód nebo řekneš kód',
+    description: 'Ověříme tvoji objednávku u výdejny.',
+    icon: QrCode,
+  },
+  {
+    title: 'Vezmeš si připravenou tašku',
+    description: 'Nákup už na tebe čeká. A můžeš jít.',
+    icon: PackageCheck,
+  },
+]
+
 const faqs = [
   ['Je stanovená minimální objednávka?', '[DOPLNIT]'],
   ['Jak se bude platit?', 'Nákup zaplatíš online při objednání. Způsoby platby ještě upřesníme.'],
@@ -61,22 +78,23 @@ const faqs = [
 function getPickupDays(): PickupDay[] {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  const saturdayOffset = (6 - today.getDay() + 7) % 7
-  const candidates = [
-    { offset: 0, label: 'Dnes' },
-    { offset: 1, label: 'Zítra' },
-    { offset: saturdayOffset, label: 'Nejbližší sobota' },
-  ]
-  const seen = new Set<string>()
+  const days: PickupDay[] = []
 
-  return candidates.flatMap(({ offset, label }) => {
+  for (let offset = 0; offset <= 7; offset += 1) {
     const date = new Date(today)
     date.setDate(date.getDate() + offset)
     const key = date.toISOString().slice(0, 10)
-    if (date.getDay() === 0 || seen.has(key) || makePickupTimes(date).length === 0) return []
-    seen.add(key)
-    return [{ id: key, date, label }]
-  })
+    if (date.getDay() === 0 || makePickupTimes(date).length === 0) continue
+
+    const label = offset === 0
+      ? 'Dnes'
+      : offset === 1
+        ? 'Zítra'
+        : new Intl.DateTimeFormat('cs-CZ', { weekday: 'long' }).format(date)
+    days.push({ id: key, date, label })
+  }
+
+  return days
 }
 
 function makePickupTimes(date: Date) {
@@ -102,25 +120,35 @@ function formatDate(date: Date) {
   return new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'long' }).format(date)
 }
 
+function formatPickupSummary(day: PickupDay, time: string) {
+  const date = new Intl.DateTimeFormat('cs-CZ', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(day.date)
+  return `${date} v ${time}`
+}
+
 function Brand() {
   return (
     <a className="public-brand" href="#nahoru" aria-label="MYNUTA, nahoru">
-      <img src="/mynuta-logo.svg" alt="MYNUTA Potraviny" />
-      <span className="public-brand-tagline">Rychle, levně – do Mynuty</span>
+      <img src={publicAsset('mynuta-logo.svg')} alt="MYNUTA" />
+      <span className="public-brand-tagline">potraviny rychle, levně – do mynuty</span>
     </a>
   )
 }
 
-function FlowIcon({ kind }: { kind: 'bag' | 'pay' | 'clock' }) {
-  if (kind === 'bag') return <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M9 14h22l-2 20H11L9 14Z" /><path d="M15 15v-3a5 5 0 0 1 10 0v3M15 22h10" /></svg>
-  if (kind === 'pay') return <svg viewBox="0 0 40 40" aria-hidden="true"><rect x="7" y="10" width="26" height="20" rx="3" /><path d="M7 17h26M12 24h7" /></svg>
-  return <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="13" /><path d="M20 12v9l6 3" /></svg>
+function FlowIcon({ kind }: { kind: 'phone' | 'pay' | 'clock' }) {
+  if (kind === 'phone') return <Smartphone aria-hidden="true" />
+  if (kind === 'pay') return <CreditCard aria-hidden="true" />
+  return <Clock3 aria-hidden="true" />
 }
 
 function PublicLanding() {
   const [stage, setStage] = useState<DemoStage>('items')
   const [quantities, setQuantities] = useState<number[]>(demoItems.map(() => 0))
-  const [dayId, setDayId] = useState('')
+  const [pickupChoice, setPickupChoice] = useState<'first' | 'second' | 'custom'>('first')
+  const [customDayId, setCustomDayId] = useState('')
   const [pickupTime, setPickupTime] = useState('')
   const [orderCode, setOrderCode] = useState('')
   const [startedAt, setStartedAt] = useState<number | null>(null)
@@ -128,7 +156,13 @@ function PublicLanding() {
   const [interestDemo, setInterestDemo] = useState(false)
 
   const pickupDays = getPickupDays()
-  const activeDay = pickupDays.find((day) => day.id === dayId) ?? pickupDays[0]
+  const quickPickupDays = pickupDays.slice(0, 2)
+  const customPickupDays = pickupDays.slice(quickPickupDays.length)
+  const activeDay = pickupChoice === 'custom'
+    ? customPickupDays.find((day) => day.id === customDayId) ?? customPickupDays[0]
+    : pickupChoice === 'second'
+      ? quickPickupDays[1] ?? quickPickupDays[0]
+      : quickPickupDays[0]
   const pickupTimes = activeDay ? makePickupTimes(activeDay.date) : []
   const activeTime = pickupTimes.includes(pickupTime) ? pickupTime : pickupTimes[0] ?? ''
   const itemCount = quantities.reduce((sum, quantity) => sum + quantity, 0)
@@ -159,6 +193,8 @@ function PublicLanding() {
   const beginAgain = () => {
     setStage('items')
     setQuantities(demoItems.map(() => 0))
+    setPickupChoice('first')
+    setCustomDayId('')
     setPickupTime('')
     setOrderCode('')
     setStartedAt(null)
@@ -176,11 +212,6 @@ function PublicLanding() {
       <header className="public-header">
         <div className="public-header-inner">
           <Brand />
-          <nav className="public-nav" aria-label="Hlavní navigace">
-            <a href="#jak-to-funguje">Jak to funguje</a>
-            <a href="#kde-a-kdy">Kde a kdy</a>
-            <a className="public-nav-cta" href="#zajemci">Chci vědět o otevření <ArrowRight size={15} /></a>
-          </nav>
         </div>
       </header>
 
@@ -190,22 +221,27 @@ function PublicLanding() {
             <span className="hero-eyebrow"><span /> NOVÁ VÝDEJNA V PLZNI-SLOVANECH</span>
             <h1 id="hero-title">Nákup objednáš cestou, vyzvedneš za minutu.</h1>
             <p>Malá výdejna potravin na Slovanech pro lidi, kteří nemají čas stát ve frontě. Žádné regály ani fronta u pokladny. Otevření plánujeme na leden 2027.</p>
-            <div className="hero-actions">
-              <a className="button-primary" href="#demo">Vyzkoušej si, jak to funguje <ArrowRight size={17} /></a>
-              <a className="button-quiet" href="#zajemci">Chci vědět o otevření <ArrowDown size={16} /></a>
-            </div>
           </div>
           <div className="hero-visual">
             <div className="hero-mark">
-              <div className="hero-bag-art" aria-hidden="true"><span className="bag-sun" /><div className="bag-shape"><img className="bag-logo" src="/mynuta-symbol.svg" alt="" /></div></div>
+              <div className="hero-bag-art" aria-hidden="true">
+                <span className="bag-sun" />
+                <span className="bag-handle" />
+                <div className="bag-shape">
+                  <span className="bag-fold" />
+                  <span className="bag-side" />
+                  <img className="bag-logo" src={publicAsset('mynuta-symbol.svg')} alt="" />
+                  <span className="bag-stamp">PŘIPRAVENO PRO TEBE</span>
+                </div>
+              </div>
               <span className="visual-note">Tvůj nákup čeká. Ty ne.</span>
             </div>
           </div>
           <div className="hero-flow" aria-label="Vyber v mobilu, zaplať online, vyzvedni za minutu">
-            <div className="flow-step"><span className="flow-icon"><FlowIcon kind="bag" /></span><span><small>01</small><strong>Vyber v mobilu</strong></span></div>
-            <span className="flow-arrow" aria-hidden="true" />
+            <div className="flow-step"><span className="flow-icon"><FlowIcon kind="phone" /></span><span><small>01</small><strong>Vyber v mobilu</strong></span></div>
+            <span className="flow-arrow" aria-hidden="true"><ArrowRight size={18} /></span>
             <div className="flow-step"><span className="flow-icon"><FlowIcon kind="pay" /></span><span><small>02</small><strong>Zaplať online</strong></span></div>
-            <span className="flow-arrow" aria-hidden="true" />
+            <span className="flow-arrow" aria-hidden="true"><ArrowRight size={18} /></span>
             <div className="flow-step"><span className="flow-icon"><FlowIcon kind="clock" /></span><span><small>03</small><strong>Vyzvedni za minutu</strong></span></div>
           </div>
         </section>
@@ -214,11 +250,19 @@ function PublicLanding() {
           <div className="wrap minute-inner">
             <div className="section-heading"><span className="section-label">ŽÁDNÉ POSTÁVÁNÍ</span><h2>Tvoje minuta na místě</h2><p>Tašku připravíme předem. Na místě si ji jen vyzvedneš.</p></div>
             <div className="minute-track">
-              <div className="minute-time-labels"><strong>0:00</strong><strong>1:00</strong></div>
-              <div className="minute-line" aria-hidden="true"><span /></div>
-              <ol className="minute-events"><li>Přijdeš ke dveřím</li><li>Řekneš kód nebo ukážeš QR</li><li>Dostaneš připravenou tašku</li><li>Odcházíš</li></ol>
+              <ol className="minute-events" aria-label="Kroky vyzvednutí">
+                {minuteEvents.map(({ title, description, icon: Icon }, index) => (
+                  <li className="minute-card" key={title}>
+                    <span className="minute-card-icon"><Icon size={27} aria-hidden="true" /></span>
+                    <div className="minute-card-content">
+                      <span className="minute-card-number">0{index + 1} / VYZVEDNUTÍ</span>
+                      <h3 className="minute-card-title">{title}</h3>
+                      <p className="minute-card-description">{description}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
             </div>
-            <p className="minute-note"><Clock3 size={15} /> Minuta je cíl, podle kterého celou výdejnu stavíme.</p>
           </div>
         </section>
 
@@ -229,7 +273,7 @@ function PublicLanding() {
             <div className="demo-phone" aria-label="Ukázka objednávky na mobilu">
               <div className="phone-speaker" aria-hidden="true" />
               <div className="phone-screen">
-                <div className="demo-topline"><img className="demo-mini-brand" src="/mynuta-logo.svg" alt="MYNUTA Potraviny" /><span className="demo-location"><MapPin size={12} /> Slovany</span></div>
+                <div className="demo-topline"><img className="demo-mini-brand" src={publicAsset('mynuta-logo.svg')} alt="MYNUTA Potraviny" /><span className="demo-location"><MapPin size={12} /> Slovany</span></div>
                 <div className="demo-badge"><span /> Ukázka – zatím nelze objednat</div>
                 <div className="demo-progress" aria-label="Průběh ukázky">
                   {['items', 'time', 'pay', 'confirmation', 'pickup'].map((step, index) => <span key={step} className={stage === 'done' || ['items', 'time', 'pay', 'confirmation', 'pickup'].indexOf(stage) >= index ? 'progress-active' : ''} />)}
@@ -242,8 +286,15 @@ function PublicLanding() {
                 </div>}
 
                 {stage === 'time' && <div className="demo-content">
-                  <div className="demo-step-title"><span>KROK 2 Z 5</span><h3>Kdy se zastavíš?</h3><p>Vyber den a půlhodinové okno.</p></div>
-                  <div className="day-options">{pickupDays.map((day) => <button type="button" key={day.id} className={activeDay?.id === day.id ? 'day-selected' : ''} onClick={() => setDayId(day.id)}><span>{day.label}</span><strong>{formatDate(day.date)}</strong></button>)}</div>
+                  <div className="demo-step-title"><span>KROK 2 Z 5</span><h3>Kdy se zastavíš?</h3><p>Vyber nejbližší termín nebo den až týden dopředu.</p></div>
+                  <div className="day-options" aria-label="Rychlý výběr dne">
+                    {quickPickupDays.map((day, index) => {
+                      const choice = index === 0 ? 'first' : 'second'
+                      return <button type="button" key={day.id} className={pickupChoice === choice ? 'day-selected' : ''} aria-pressed={pickupChoice === choice} onClick={() => setPickupChoice(choice)}><span>{day.label}</span><strong>{formatDate(day.date)}</strong></button>
+                    })}
+                    <button type="button" className={pickupChoice === 'custom' ? 'day-selected' : ''} aria-pressed={pickupChoice === 'custom'} onClick={() => setPickupChoice('custom')}><span>Jiný den</span><strong>Až týden</strong></button>
+                  </div>
+                  {pickupChoice === 'custom' && <div className="custom-day-picker"><label htmlFor="custom-pickup-day">Den vyzvednutí</label><div className="select-wrap"><select id="custom-pickup-day" value={activeDay?.id ?? ''} onChange={(event) => setCustomDayId(event.target.value)}>{customPickupDays.map((day) => <option key={day.id} value={day.id}>{day.label}, {formatDate(day.date)}</option>)}</select><ChevronDown size={16} /></div></div>}
                   {activeDay && <div className="time-picker"><label htmlFor="pickup-time">Čas vyzvednutí</label><div className="select-wrap"><select id="pickup-time" value={activeTime} onChange={(event) => setPickupTime(event.target.value)}>{pickupTimes.map((time) => <option key={time} value={time}>{time}</option>)}</select><ChevronDown size={16} /></div><small>{activeDay.date.getDay() === 6 ? 'Sobota · 9:00–12:00' : 'Pondělí–pátek · 14:00–20:00'}</small></div>}
                   <div className="demo-bottom"><button className="demo-back" onClick={() => setStage('items')}>Zpět</button><button className="demo-next" onClick={() => setStage('pay')} disabled={!activeTime}>Pokračovat <ArrowRight size={16} /></button></div>
                 </div>}
@@ -252,7 +303,7 @@ function PublicLanding() {
                   <div className="demo-step-title"><span>KROK 3 Z 5</span><h3>Všechno připravené.</h3><p>Tohle je jen ukázka. Nic se neodesílá a žádné peníze se nestrhnou.</p></div>
                   <div className="payment-preview"><span className="payment-icon"><CreditCard size={20} /></span><span><strong>Platba online</strong><small>Bez zadávání údajů v ukázce</small></span><Check size={17} /></div>
                   <div className="demo-summary-line"><span>Položek v tašce</span><strong>{itemCount}</strong></div>
-                  <div className="demo-summary-line"><span>Vyzvednutí</span><strong>{activeDay ? `${activeDay.label}, ${activeTime}` : activeTime}</strong></div>
+                  <div className="demo-summary-line"><span>Vyzvednutí</span><strong>{activeDay ? formatPickupSummary(activeDay, activeTime) : activeTime}</strong></div>
                   <div className="demo-bottom"><button className="demo-back" onClick={() => setStage('time')}>Zpět</button><button className="demo-next" onClick={() => { setOrderCode(String(Math.floor(1000 + Math.random() * 9000))); setStage('confirmation') }}>Zaplatit (ukázka) <ArrowRight size={16} /></button></div>
                 </div>}
 
@@ -260,7 +311,7 @@ function PublicLanding() {
                   <div className="demo-step-title"><span>KROK 4 Z 5</span><h3>Taška je připravená.</h3><p>Ukázková objednávka je hotová.</p></div>
                   <div className="code-ticket"><span>TVŮJ UKÁZKOVÝ KÓD</span><strong>{code}</strong><QrCode size={23} /></div>
                   <div className="demo-summary-line"><span>V tašce</span><strong>{demoItems.filter((_, index) => quantities[index] > 0).map((item) => `${item.name} × ${quantities[demoItems.indexOf(item)]}`).join(', ')}</strong></div>
-                  <div className="demo-summary-line"><span>Vyzvednutí</span><strong>{activeDay ? `${activeDay.label}, ${activeTime}` : activeTime}</strong></div>
+                  <div className="demo-summary-line"><span>Vyzvednutí</span><strong>{activeDay ? formatPickupSummary(activeDay, activeTime) : activeTime}</strong></div>
                   <p className="pickup-instruction">U výdeje řekni kód. Tašku máš připravenou, do minuty jsi venku.</p>
                   <button className="demo-next demo-wide" onClick={startPickup}>Jsem u výdeje <ArrowRight size={16} /></button>
                 </div>}
