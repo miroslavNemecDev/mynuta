@@ -1,26 +1,28 @@
 import { useEffect, useState } from 'react'
 import {
   ArrowRight,
-  Apple,
   Check,
   ChevronDown,
-  Clock3,
-  Coffee,
-  CreditCard,
-  Egg,
   MapPin,
   Minus,
-  Milk,
-  PackageCheck,
   Plus,
-  QrCode,
-  Smartphone,
-  Wheat,
-  type LucideIcon,
 } from 'lucide-react'
 import './PublicLanding.css'
 
-type DemoItem = { name: string; icon: LucideIcon }
+import pripravenaTaskaIcon from './assets/icons/svg-svetle/pripravena-taska.svg'
+import qrIcon from './assets/icons/svg-svetle/qr.svg'
+import kartaIcon from './assets/icons/svg-svetle/karta.svg'
+import hodinyIcon from './assets/icons/svg-svetle/hodiny.svg'
+import pecivoIcon from './assets/icons/svg-svetle/pecivo.svg'
+import mlekoIcon from './assets/icons/svg-svetle/mleko.svg'
+import vejceIcon from './assets/icons/svg-svetle/vejce.svg'
+import ovoceIcon from './assets/icons/svg-svetle/ovoce.svg'
+import zeleninaIcon from './assets/icons/svg-svetle/zelenina.svg'
+import masoIcon from './assets/icons/svg-svetle/maso.svg'
+import napojeIcon from './assets/icons/svg-svetle/napoje.svg'
+import mobilIcon from './assets/icons/svg-svetle/mobil.svg'
+
+type DemoItem = { name: string; icon: string }
 type PickupDay = { id: string; date: Date; label: string }
 type DemoStage = 'items' | 'time' | 'pay' | 'confirmation' | 'pickup' | 'done'
 
@@ -29,18 +31,18 @@ function publicAsset(filename: string) {
 }
 
 const demoItems: DemoItem[] = [
-  { name: 'Rohlíky', icon: Wheat },
-  { name: 'Chléb', icon: Wheat },
-  { name: 'Mléko', icon: Milk },
-  { name: 'Máslo', icon: PackageCheck },
-  { name: 'Vejce', icon: Egg },
-  { name: 'Šunka', icon: PackageCheck },
-  { name: 'Eidam', icon: PackageCheck },
-  { name: 'Banány', icon: Apple },
-  { name: 'Jablka', icon: Apple },
-  { name: 'Rajčata', icon: Apple },
-  { name: 'Minerálka', icon: Coffee },
-  { name: 'Káva', icon: Coffee },
+  { name: 'Rohlíky', icon: pecivoIcon },
+  { name: 'Chléb', icon: pecivoIcon },
+  { name: 'Mléko', icon: mlekoIcon },
+  { name: 'Máslo', icon: mlekoIcon },
+  { name: 'Vejce', icon: vejceIcon },
+  { name: 'Šunka', icon: masoIcon },
+  { name: 'Eidam', icon: masoIcon },
+  { name: 'Banány', icon: ovoceIcon },
+  { name: 'Jablka', icon: ovoceIcon },
+  { name: 'Rajčata', icon: zeleninaIcon },
+  { name: 'Minerálka', icon: napojeIcon },
+  { name: 'Káva', icon: napojeIcon },
 ]
 
 const categories = [
@@ -57,12 +59,12 @@ const minuteEvents = [
   {
     title: 'Ukážeš QR kód nebo řekneš kód',
     description: 'Ověříme tvoji objednávku u výdejny.',
-    icon: QrCode,
+    icon: qrIcon,
   },
   {
     title: 'Vezmeš si připravenou tašku',
     description: 'Nákup už na tebe čeká. A můžeš jít.',
-    icon: PackageCheck,
+    icon: pripravenaTaskaIcon,
   },
 ]
 
@@ -139,9 +141,12 @@ function Brand() {
 }
 
 function FlowIcon({ kind }: { kind: 'phone' | 'pay' | 'clock' }) {
-  if (kind === 'phone') return <Smartphone aria-hidden="true" />
-  if (kind === 'pay') return <CreditCard aria-hidden="true" />
-  return <Clock3 aria-hidden="true" />
+  const iconMap = {
+    phone: mobilIcon,
+    pay: kartaIcon,
+    clock: hodinyIcon,
+  }
+  return <img src={iconMap[kind]} alt="" aria-hidden="true" className="flow-custom-icon" />
 }
 
 function PublicLanding() {
@@ -253,7 +258,7 @@ function PublicLanding() {
               <ol className="minute-events" aria-label="Kroky vyzvednutí">
                 {minuteEvents.map(({ title, description, icon: Icon }, index) => (
                   <li className="minute-card" key={title}>
-                    <span className="minute-card-icon"><Icon size={27} aria-hidden="true" /></span>
+                    <span className="minute-card-icon"><img src={Icon} alt="" aria-hidden="true" className="minute-custom-icon" /></span>
                     <div className="minute-card-content">
                       <span className="minute-card-number">0{index + 1} / VYZVEDNUTÍ</span>
                       <h3 className="minute-card-title">{title}</h3>
@@ -281,7 +286,7 @@ function PublicLanding() {
 
                 {stage === 'items' && <div className="demo-content">
                   <div className="demo-step-title"><span>KROK 1 Z 5</span><h3>Co si dáš do tašky?</h3><p>Vyber si pár věcí na ukázku.</p></div>
-                  <div className="demo-items">{demoItems.map(({ name, icon: Icon }, index) => <div className="demo-item" key={name}><span className="demo-item-icon"><Icon size={17} /></span><span>{name}</span><div className="demo-quantity"><button aria-label={`Odebrat ${name}`} onClick={() => adjustQuantity(index, -1)} disabled={quantities[index] === 0}><Minus size={13} /></button><b>{quantities[index]}</b><button aria-label={`Přidat ${name}`} onClick={() => adjustQuantity(index, 1)}><Plus size={13} /></button></div></div>)}</div>
+                  <div className="demo-items">{demoItems.map(({ name, icon }, index) => <div className="demo-item" key={name}><span className="demo-item-icon"><img src={icon} alt="" aria-hidden="true" className="demo-item-custom-icon" /></span><span>{name}</span><div className="demo-quantity"><button aria-label={`Odebrat ${name}`} onClick={() => adjustQuantity(index, -1)} disabled={quantities[index] === 0}><Minus size={13} /></button><b>{quantities[index]}</b><button aria-label={`Přidat ${name}`} onClick={() => adjustQuantity(index, 1)}><Plus size={13} /></button></div></div>)}</div>
                   <div className="demo-bottom"><span>V košíku <strong>{itemCount} {itemCount === 1 ? 'kus' : itemCount > 1 && itemCount < 5 ? 'kusy' : 'kusů'}</strong></span><button className="demo-next" onClick={() => setStage('time')} disabled={itemCount === 0}>Vybrat čas <ArrowRight size={16} /></button></div>
                 </div>}
 
@@ -301,7 +306,7 @@ function PublicLanding() {
 
                 {stage === 'pay' && <div className="demo-content demo-centered">
                   <div className="demo-step-title"><span>KROK 3 Z 5</span><h3>Všechno připravené.</h3><p>Tohle je jen ukázka. Nic se neodesílá a žádné peníze se nestrhnou.</p></div>
-                  <div className="payment-preview"><span className="payment-icon"><CreditCard size={20} /></span><span><strong>Platba online</strong><small>Bez zadávání údajů v ukázce</small></span><Check size={17} /></div>
+                  <div className="payment-preview"><span className="payment-icon"><img src={kartaIcon} alt="" aria-hidden="true" className="payment-custom-icon" /></span><span><strong>Platba online</strong><small>Bez zadávání údajů v ukázce</small></span><Check size={17} /></div>
                   <div className="demo-summary-line"><span>Položek v tašce</span><strong>{itemCount}</strong></div>
                   <div className="demo-summary-line"><span>Vyzvednutí</span><strong>{activeDay ? formatPickupSummary(activeDay, activeTime) : activeTime}</strong></div>
                   <div className="demo-bottom"><button className="demo-back" onClick={() => setStage('time')}>Zpět</button><button className="demo-next" onClick={() => { setOrderCode(String(Math.floor(1000 + Math.random() * 9000))); setStage('confirmation') }}>Zaplatit (ukázka) <ArrowRight size={16} /></button></div>
@@ -309,7 +314,7 @@ function PublicLanding() {
 
                 {stage === 'confirmation' && <div className="demo-content demo-centered">
                   <div className="demo-step-title"><span>KROK 4 Z 5</span><h3>Taška je připravená.</h3><p>Ukázková objednávka je hotová.</p></div>
-                  <div className="code-ticket"><span>TVŮJ UKÁZKOVÝ KÓD</span><strong>{code}</strong><QrCode size={23} /></div>
+                  <div className="code-ticket"><span>TVŮJ UKÁZKOVÝ KÓD</span><strong>{code}</strong><img src={qrIcon} alt="" aria-hidden="true" className="code-ticket-icon" /></div>
                   <div className="demo-summary-line"><span>V tašce</span><strong>{demoItems.filter((_, index) => quantities[index] > 0).map((item) => `${item.name} × ${quantities[demoItems.indexOf(item)]}`).join(', ')}</strong></div>
                   <div className="demo-summary-line"><span>Vyzvednutí</span><strong>{activeDay ? formatPickupSummary(activeDay, activeTime) : activeTime}</strong></div>
                   <p className="pickup-instruction">U výdeje řekni kód. Tašku máš připravenou, do minuty jsi venku.</p>
