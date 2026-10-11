@@ -1,4 +1,6 @@
 export default async function handler(req: any, res: any) {
+  console.log('Subscribe route hit', { method: req.method })
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Metoda není povolena.' })
   }
@@ -13,6 +15,8 @@ export default async function handler(req: any, res: any) {
     const body = rawBody ? JSON.parse(rawBody) : {}
     const email = typeof body.email === 'string' ? body.email.trim() : ''
 
+    console.log('Parsed payload', { email })
+
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res.status(400).json({ error: 'Zadej platný e-mail.' })
     }
@@ -22,6 +26,14 @@ export default async function handler(req: any, res: any) {
     const smtpPass = process.env.SMTP_PASS
     const emailFrom = process.env.EMAIL_FROM || 'noreply@localhost'
     const emailTo = process.env.EMAIL_TO || 'info@mynuta.cz'
+
+    console.log('SMTP config check', {
+      smtpHost: !!smtpHost,
+      smtpUser: !!smtpUser,
+      smtpPass: !!smtpPass,
+      emailFrom,
+      emailTo,
+    })
 
     if (!smtpHost || !smtpUser || !smtpPass) {
       return res.status(503).json({ error: 'Emailový server není nakonfigurovaný.' })
@@ -38,6 +50,8 @@ export default async function handler(req: any, res: any) {
       },
     })
 
+    console.log('Attempting SMTP sendMail')
+
     await transporter.sendMail({
       from: `"MYNUTA" <${emailFrom}>`,
       to: emailTo,
@@ -51,6 +65,7 @@ export default async function handler(req: any, res: any) {
       `,
     })
 
+    console.log('SMTP sendMail success')
     return res.status(200).json({ ok: true })
   } catch (error) {
     console.error('Subscribe error', error)

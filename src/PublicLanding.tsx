@@ -222,6 +222,8 @@ function PublicLanding() {
     setInterestMessage('')
 
     try {
+      console.log('Submitting contact form', { email })
+
       const response = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -229,6 +231,7 @@ function PublicLanding() {
       })
 
       const data = await response.json().catch(() => ({}))
+      console.log('Subscribe response', { status: response.status, body: data })
 
       if (!response.ok) {
         throw new Error(data?.error || 'Přihlášení se nepovedlo odeslat.')
