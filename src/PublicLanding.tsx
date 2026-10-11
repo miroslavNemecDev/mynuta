@@ -133,7 +133,7 @@ function Brand() {
   return (
     <a className="public-brand" href="#nahoru" aria-label="MYNUTA, nahoru">
       <img src={publicAsset('mynuta-logo.svg')} alt="MYNUTA" />
-      <span className="public-brand-tagline">potraviny rychle, levně – do mynuty</span>
+      <span className="public-brand-tagline">rychle, levně – do mynuty</span>
     </a>
   )
 }
