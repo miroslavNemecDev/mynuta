@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import {
   ArrowRight,
   Check,
@@ -8,6 +8,7 @@ import {
   Plus,
 } from 'lucide-react'
 import './PublicLanding.css'
+import { playBagIntro, type BagIntro } from './heroBagIntro'
 
 import pripravenaTaskaIcon from './assets/icons/svg-svetle/pripravena-taska.svg'
 import qrIcon from './assets/icons/svg-svetle/qr.svg'
@@ -28,6 +29,10 @@ import bagTrh from './assets/bags/mynuta-taska-papirova/svg/taska-papirova-trh.s
 type DemoItem = { name: string; icon: string }
 type PickupDay = { id: string; date: Date; label: string }
 type DemoStage = 'items' | 'time' | 'pay' | 'confirmation' | 'pickup' | 'done'
+type Faq = { id?: string; question: string; answer: ReactNode }
+
+const bagLoaders = import.meta.glob<string>('./assets/bags/mynuta-taska-papirova/svg/taska-papirova-*.svg', { query: '?raw', import: 'default' })
+const bagLoaderKeys = Object.keys(bagLoaders).sort()
 
 function publicAsset(filename: string) {
   return `${import.meta.env.BASE_URL}${filename}`
@@ -49,14 +54,67 @@ const demoItems: DemoItem[] = [
 ]
 
 const categories = [
-  ['Pečivo', 'Rohlíky, chléb'],
-  ['Mléčné výrobky', 'Mléko, máslo'],
-  ['Uzeniny a sýry', 'Šunka, eidam'],
-  ['Ovoce a zelenina', 'Jablka, rajčata'],
-  ['Nápoje', 'Voda, limonády'],
-  ['Trvanlivé potraviny', 'Těstoviny, rýže'],
-  ['Základní drogerie', 'Věci pro každý den'],
+  ['Pečivo', 'Rohlíky, chléb, sladké pečivo'],
+  ['Mléčné výrobky a vejce', 'Mléko, jogurty, máslo, vejce'],
+  ['Maso, uzeniny a sýry', 'Balené maso, šunka, eidam'],
+  ['Ovoce a zelenina', 'Jablka, banány, rajčata'],
+  ['Nápoje', 'Voda, limonády, džusy'],
+  ['Trvanlivé potraviny', 'Těstoviny, rýže, konzervy, káva'],
+  ['Základní drogerie', 'Toaletní papír, mýdlo, zubní pasta'],
 ]
+
+const comparisonRows = [
+  ['Kolik času tě nákup stojí', 'Regály a fronta u pokladny', 'Čekání doma na kurýra', 'Minuta u výdeje'],
+  ['Musíš být doma?', 'Ne', 'Ano, v domluveném čase', 'Ne, vyzvedneš cestou'],
+  ['Fronta u pokladny', 'Hlavně ve špičce', 'Žádná', 'Žádná, taška už čeká'],
+]
+
+const dayMoments = [
+  ['14:00–16:00', 'Po ranní směně', 'Objednáš ještě v šatně a cestou z tramvaje si tašku vezmeš.'],
+  ['16:00–20:00', 'Cestou z práce', 'Objednáš před odchodem z práce. Doma už jen vybalíš.'],
+  ['9:00–12:00', 'V sobotu s dětmi', 'Žádná fronta a žádný regál se sladkostmi u pokladny.'],
+  ['30 min před zavřením', 'Na poslední chvíli', 'Chybí ti něco na večeři? Skladové věci připravíme ještě dnes.'],
+]
+
+const timelineSteps = [
+  { date: 'ŘÍJEN–LISTOPAD 2026', title: 'Sbíráme zájemce a jednáme o prostoru', text: 'Výdejna vznikne, když o ni bude na Slovanech zájem. Každý zápis se počítá.', status: 'Právě teď', current: true },
+  { date: 'PROSINEC 2026', title: 'Stavíme výdejnu', text: 'Podpis nájmu, lednice a regály. Ze zapsaných pozveme první hosty na zkušební výdej.', status: '', current: false },
+  { date: 'LEDEN 2027', title: 'Otevíráme', text: 'Přesné datum pošleme nejdřív zapsaným.', status: 'Plán', current: false },
+]
+
+const interestBenefits = [
+  'Datum otevření se dozvíš jako první.',
+  'Ze zapsaných pozveme první hosty na zkušební výdej.',
+  'Přesnou adresu pošleme hned po podpisu smlouvy.',
+]
+
+const commonCzechSurnames = [
+  'Novák', 'Svoboda', 'Novotný', 'Dvořák', 'Černý',
+  'Procházka', 'Kučera', 'Veselý', 'Horák', 'Němec',
+  'Marek', 'Pospíšil', 'Pokorný', 'Hájek', 'Jelínek',
+  'Král', 'Růžička', 'Beneš', 'Fiala', 'Sedláček',
+]
+
+type FlowOption = { title: string; hint: string }
+
+const orderMoments: FlowOption[] = [
+  { title: 'Týdenní nákup z gauče', hint: 'Sestavíš ho v klidu doma.' },
+  { title: 'Doobjednej o pauze v práci', hint: 'Pár klepnutí a máš hotovo.' },
+  { title: 'Sestav ho na počítači', hint: 'Velká obrazovka, žádný spěch.' },
+  { title: 'Partner už je na cestě', hint: 'Objednáš předem. Nemusí řešit mobil za jízdy ani čekat v obchodě.' },
+]
+
+const paymentMoments: FlowOption[] = [
+  { title: 'Zaplať online', hint: 'Předem, na místě už nic neřešíš.' },
+  { title: 'Zaplať na místě', hint: 'Po jednoduché registraci.' },
+]
+
+const ticketTimeOptions = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00']
+
+function pickRandomTime(current: string) {
+  const candidates = ticketTimeOptions.filter((time) => time !== current)
+  return candidates[Math.floor(Math.random() * candidates.length)]
+}
 
 const minuteEvents = [
   {
@@ -71,13 +129,19 @@ const minuteEvents = [
   },
 ]
 
-const faqs = [
-  ['Je stanovená minimální objednávka?', '[DOPLNIT]'],
-  ['Jak se bude platit?', 'Nákup zaplatíš online při objednání. Způsoby platby ještě upřesníme.'],
-  ['Jak bude zajištěné chlazené zboží?', '[DOPLNIT]'],
-  ['Co když nestihnu vybraný čas?', '[DOPLNIT]'],
-  ['Co když s nákupem nebude něco v pořádku?', '[DOPLNIT]'],
-  ['Proč máte v neděli zavřeno?', '[DOPLNIT]'],
+const contactEmail = 'info@mynuta.cz'
+const contactLink = <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+
+const faqs: Faq[] = [
+  { question: 'Za jak dlouho bude nákup připravený?', answer: 'Co máme skladem, nachystáme do 30 minut, často i dřív. Jakmile je taška připravená, pošleme ti e-mail. Časy pro dnešní výdej uvidíš mezi aktuálně dostupnými termíny. Věci, které skladem nemáme, objednáme a připravené jsou nejdřív další otevírací den.' },
+  { question: 'Je stanovená minimální objednávka?', answer: 'Zatím ne. Podmínky objednávek i ceník zveřejníme před otevřením.' },
+  { question: 'Jak se bude platit?', answer: 'Nákup zaplatíš online při objednání, na místě už nic neplatíš. Způsoby platby upřesníme před otevřením.' },
+  { question: 'Co když nestihnu vybraný čas?', answer: 'Nevadí. Nákup na tebe počká do konce otevírací doby a chlazené věci zatím zůstanou v lednici. Když nestihneš ani to, napiš nám a domluvíme se na dalším dni.' },
+  { question: 'Jak bude zajištěné chlazené zboží?', answer: 'Chlazené a mražené věci čekají až do výdeje v lednici a mrazáku. Teplotu v nich hlídají čidla.' },
+  { question: 'Co když s nákupem nebude něco v pořádku?', answer: <>Tašku si můžeš zkontrolovat hned u výdeje. Když na něco přijdeš až doma, napiš na {contactLink}. Chybějící věci ti vrátíme na kartu, vadné vyměníme, nebo vrátíme peníze.</> },
+  { question: 'Kde přesně budete?', answer: 'Na Slovanech, hned u tramvajové zastávky. Přesnou adresu zveřejníme po podpisu smlouvy a zapsaní ji dostanou e-mailem jako první.' },
+  { question: 'Proč máte v neděli zavřeno?', answer: 'Neděle podle nás nemá patřit nákupům. Od pondělí do pátku jsme tu od 14 do 20, v sobotu od 9 do 12.' },
+  { id: 'faq-email', question: 'Co uděláte s mým e-mailem?', answer: <>Použijeme ho jen ke zprávám o otevření a novinkám MYNUTY a nikomu ho nedáme. Odhlásit se můžeš kdykoli, stačí napsat na {contactLink}. Kdyby MYNUTA neotevřela, seznam smažeme. Správcem údajů je Miroslav Němec. Máš právo na přístup k údajům, jejich opravu i výmaz a můžeš podat stížnost u Úřadu pro ochranu osobních údajů.</> },
 ]
 
 function getPickupDays(): PickupDay[] {
@@ -138,7 +202,7 @@ function Brand() {
   return (
     <a className="public-brand" href="#nahoru" aria-label="MYNUTA, nahoru">
       <img src={publicAsset('mynuta-logo.svg')} alt="MYNUTA" />
-      <span className="public-brand-tagline">rychle, levně – do mynuty</span>
+      <span className="public-brand-tagline">rychle – do mynuty</span>
     </a>
   )
 }
@@ -150,6 +214,54 @@ function FlowIcon({ kind }: { kind: 'phone' | 'pay' | 'clock' }) {
     clock: hodinyIcon,
   }
   return <img src={iconMap[kind]} alt="" aria-hidden="true" className="flow-custom-icon" />
+}
+
+function FlowChoice({ number, kind, options, autoRotateMs }: {
+  number: string
+  kind: 'phone' | 'pay' | 'clock'
+  options: FlowOption[]
+  autoRotateMs?: number
+}) {
+  const [index, setIndex] = useState(0)
+  const [touched, setTouched] = useState(false)
+  const [paused, setPaused] = useState(false)
+
+  useEffect(() => {
+    if (!autoRotateMs || touched || paused || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const timer = window.setInterval(() => setIndex((current) => (current + 1) % options.length), autoRotateMs)
+    return () => window.clearInterval(timer)
+  }, [autoRotateMs, touched, paused, options.length])
+
+  const current = options[index]
+
+  return (
+    <button
+      type="button"
+      className="flow-step flow-choice"
+      aria-label={`${number}. ${current.title}. ${current.hint} Klepnutím změníš variantu.`}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
+      onClick={() => {
+        setTouched(true)
+        setIndex((value) => (value + 1) % options.length)
+      }}
+    >
+      <span className="flow-icon">
+        <FlowIcon kind={kind} />
+      </span>
+      <span className="flow-text">
+        <small>{number}</small>
+        <strong key={`title-${index}`} className="flow-swap">{current.title}</strong>
+        <span key={`hint-${index}`} className="flow-hint flow-swap">{current.hint}</span>
+        <span className="flow-footer">
+          <span className="flow-dots" aria-hidden="true">{options.map((option, optionIndex) => <i key={option.title} className={optionIndex === index ? 'active' : ''} />)}</span>
+          <span className="flow-change" aria-hidden="true">Změnit</span>
+        </span>
+      </span>
+    </button>
+  )
 }
 
 function PublicLanding() {
@@ -165,6 +277,18 @@ function PublicLanding() {
   const [interestState, setInterestState] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
   const [interestMessage, setInterestMessage] = useState('')
   const [activeBagIndex] = useState<number>(() => Math.floor(Math.random() * 3))
+  const [ticketName, setTicketName] = useState<string | null>(null)
+  const [demoTicketName, setDemoTicketName] = useState('')
+  const [surnameIndex, setSurnameIndex] = useState(0)
+  const [ticketPickupTime, setTicketPickupTime] = useState(() => pickRandomTime(''))
+  const [ticketTimeMenuOpen, setTicketTimeMenuOpen] = useState(false)
+  const timeListDrag = useRef({ active: false, moved: false, startY: 0, startScroll: 0 })
+  const ticketTimeTouched = useRef(false)
+  const bagMountRef = useRef<HTMLDivElement>(null)
+  const [bagFailed, setBagFailed] = useState(false)
+  const [bagTapDelay, setBagTapDelay] = useState<number | null>(null)
+  const [introDone, setIntroDone] = useState(false)
+  const [ticketTimeShown, setTicketTimeShown] = useState(false)
 
   const bagVariants = [bagPekarna, bagSnidane, bagTrh]
 
@@ -196,6 +320,70 @@ function PublicLanding() {
     }, 100)
     return () => window.clearInterval(timer)
   }, [stage, startedAt])
+
+  useEffect(() => {
+    const mount = bagMountRef.current
+    if (!mount) return
+    let cancelled = false
+    let intro: BagIntro | undefined
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    bagLoaders[bagLoaderKeys[activeBagIndex]]()
+      .then((markup) => {
+        if (cancelled) return
+        mount.innerHTML = markup
+        if (reduceMotion) {
+          setIntroDone(true)
+          return
+        }
+        intro = playBagIntro(
+          mount,
+          () => { if (!cancelled) setIntroDone(true) },
+          () => {
+            if (cancelled) return
+            setSurnameIndex((current) => (current + 1) % commonCzechSurnames.length)
+            if (!ticketTimeTouched.current) setTicketPickupTime(pickRandomTime)
+          },
+        )
+        setBagTapDelay(intro.tapDelayMs)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setBagFailed(true)
+        setIntroDone(true)
+      })
+
+    return () => {
+      cancelled = true
+      intro?.stop()
+      mount.innerHTML = ''
+    }
+  }, [activeBagIndex])
+
+  useEffect(() => {
+    if (ticketName !== null || !introDone) return
+
+    const surname = commonCzechSurnames[surnameIndex]
+    let timer: number
+    let characterCount = 0
+
+    const typeNextCharacter = () => {
+      characterCount += 1
+      setDemoTicketName(surname.slice(0, characterCount))
+
+      if (characterCount < surname.length) {
+        timer = window.setTimeout(typeNextCharacter, 115)
+      }
+    }
+
+    timer = window.setTimeout(() => {
+      setDemoTicketName('')
+      if (surnameIndex > 0 && !ticketTimeTouched.current) setTicketPickupTime(pickRandomTime)
+      setTicketTimeShown(true)
+      typeNextCharacter()
+    }, surnameIndex === 0 ? 250 : 0)
+    return () => window.clearTimeout(timer)
+  }, [surnameIndex, ticketName, introDone])
 
   const adjustQuantity = (index: number, change: number) => {
     setQuantities((current) => current.map((quantity, itemIndex) => (
@@ -275,17 +463,141 @@ function PublicLanding() {
           </div>
           <div className="hero-visual">
             <div className="hero-mark">
-              <div className="hero-bag-art" aria-hidden="true">
-                <img className="bag-asset" src={bagVariants[activeBagIndex]} alt="" />
+              <div
+                className={`hero-bag-art${bagTapDelay !== null ? ' is-playing' : ''}`}
+                style={bagTapDelay !== null ? ({ '--bag-tap-delay': `${bagTapDelay}ms` } as React.CSSProperties) : undefined}
+              >
+                {bagFailed
+                  ? <img className="bag-asset" src={bagVariants[activeBagIndex]} alt="" aria-hidden="true" />
+                  : <div className="bag-asset" ref={bagMountRef} aria-hidden="true" />}
+                <div className="bag-phone-layer">
+                  <button
+                    type="button"
+                    className="bag-phone"
+                    aria-label="Vyzkoušet ukázkovou objednávku"
+                    title="Vyzkoušet objednávku"
+                    onClick={() => {
+                      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+                      document.getElementById('demo')?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
+                    }}
+                  >
+                    <svg className="bag-phone-cursor" viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 3.2V19l4.1-3.8 2.8 6.2 2.6-1.2-2.7-6 5.7-.2z" /></svg>
+                    <span className="bag-phone-notch" aria-hidden="true" />
+                    <span className="bag-phone-screen" aria-hidden="true">
+                      <span className="bag-phone-top"><i /><i /></span>
+                      <span className="bag-phone-row"><i /><i /></span>
+                      <span className="bag-phone-row"><i /><i /></span>
+                      <span className="bag-phone-row"><i /><i /></span>
+                      <b />
+                    </span>
+                  </button>
+                </div>
+                <div className="ticket-name-layer">
+                  <input
+                    id="ticket-name"
+                    className={`ticket-name-input${introDone ? ' is-ready' : ''}`}
+                    type="text"
+                    aria-label="Příjmení na lístku"
+                    title="Jméno na lístku"
+                    value={ticketName ?? demoTicketName}
+                    maxLength={18}
+                    placeholder="_"
+                    autoComplete="off"
+                    spellCheck={false}
+                    onFocus={(event) => {
+                      if (ticketName === null) {
+                        setTicketName(demoTicketName)
+                        event.currentTarget.select()
+                      }
+                    }}
+                    onChange={(event) => setTicketName(event.target.value)}
+                    onBlur={(event) => {
+                      if (!event.currentTarget.value.trim()) setTicketName(null)
+                    }}
+                  />
+                </div>
+                <div
+                  className="ticket-time-control"
+                  onBlur={(event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget)) setTicketTimeMenuOpen(false)
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Escape') setTicketTimeMenuOpen(false)
+                  }}
+                >
+                  <button
+                    type="button"
+                    className="ticket-time-button"
+                    aria-label="Změnit čas na lístku"
+                    aria-expanded={ticketTimeMenuOpen}
+                    aria-controls="ticket-time-menu"
+                    onClick={() => {
+                      ticketTimeTouched.current = true
+                      setTicketTimeShown(true)
+                      setTicketTimeMenuOpen((open) => !open)
+                    }}
+                  >
+                    {(ticketTimeShown || ticketName !== null) && <span key={ticketPickupTime} className="ticket-time-value">{ticketPickupTime}</span>}
+                  </button>
+                  {ticketTimeMenuOpen && <div className="ticket-time-menu" id="ticket-time-menu">
+                    <div
+                      className="ticket-time-options"
+                      role="group"
+                      aria-label="Nabízené časy"
+                      onPointerDown={(event) => {
+                        if (event.pointerType === 'touch') return
+                        timeListDrag.current = { active: true, moved: false, startY: event.clientY, startScroll: event.currentTarget.scrollTop }
+                      }}
+                      onPointerMove={(event) => {
+                        const drag = timeListDrag.current
+                        if (!drag.active) return
+                        const distance = event.clientY - drag.startY
+                        if (!drag.moved && Math.abs(distance) > 4) {
+                          drag.moved = true
+                          event.currentTarget.setPointerCapture(event.pointerId)
+                        }
+                        if (drag.moved) event.currentTarget.scrollTop = drag.startScroll - distance
+                      }}
+                      onPointerUp={(event) => {
+                        timeListDrag.current.active = false
+                        if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
+                      }}
+                      onPointerCancel={() => { timeListDrag.current.active = false }}
+                      onClickCapture={(event) => {
+                        if (!timeListDrag.current.moved) return
+                        timeListDrag.current.moved = false
+                        event.preventDefault()
+                        event.stopPropagation()
+                      }}
+                    >
+                      {ticketTimeOptions.map((time) => <button
+                        type="button"
+                        key={time}
+                        aria-pressed={ticketPickupTime === time}
+                        className={ticketPickupTime === time ? 'ticket-time-option selected' : 'ticket-time-option'}
+                        onClick={() => {
+                          setTicketPickupTime(time)
+                          setTicketTimeMenuOpen(false)
+                        }}
+                      >{time}</button>)}
+                    </div>
+                    <label className="ticket-time-custom"><span>Jiný:</span><input
+                      type="time"
+                      aria-label="Vlastní čas na lístku"
+                      value={ticketPickupTime}
+                      onChange={(event) => setTicketPickupTime(event.target.value)}
+                    /></label>
+                  </div>}
+                </div>
               </div>
             </div>
           </div>
-          <div className="hero-flow" aria-label="Vyber v mobilu, zaplať online, vyzvedni za minutu">
-            <div className="flow-step"><span className="flow-icon"><FlowIcon kind="phone" /></span><span><small>01</small><strong>Vyber v mobilu</strong></span></div>
+          <div className="hero-flow" aria-label="Sestav nákup, zaplať a vyzvedni za minutu">
+            <FlowChoice number="01 · VÝBĚR" kind="phone" options={orderMoments} autoRotateMs={4200} />
             <span className="flow-arrow" aria-hidden="true"><ArrowRight size={18} /></span>
-            <div className="flow-step"><span className="flow-icon"><FlowIcon kind="pay" /></span><span><small>02</small><strong>Zaplať online</strong></span></div>
+            <FlowChoice number="02 · PLATBA" kind="pay" options={paymentMoments} />
             <span className="flow-arrow" aria-hidden="true"><ArrowRight size={18} /></span>
-            <div className="flow-step"><span className="flow-icon"><FlowIcon kind="clock" /></span><span><small>03</small><strong>Vyzvedni za minutu</strong></span></div>
+            <div className="flow-step flow-step-final"><span className="flow-icon"><FlowIcon kind="clock" /></span><span className="flow-text"><small>03 · HOTOVO</small><strong>Vyzvedni za minutu</strong><span className="flow-hint">Taška už čeká.</span></span></div>
           </div>
         </section>
 
@@ -381,62 +693,52 @@ function PublicLanding() {
             <div className="section-heading"><span className="section-label">JINÝ ZPŮSOB NÁKUPU</span><h2>Čím se MYNUTA liší</h2></div>
             <div className="comparison" role="table" aria-label="Srovnání způsobů nákupu">
               <div className="comparison-row comparison-head" role="row"><div role="columnheader"> </div><div role="columnheader">Běžný obchod</div><div role="columnheader">Rozvoz domů</div><div role="columnheader" className="mynuta-column">MYNUTA</div></div>
-              {[
-                ['Kde ztrácíš čas', 'Mezi regály a u pokladny', 'Čekáním doma', 'Jen cestou k nám'],
-                ['Musíš na nákup čekat doma?', 'Ne', 'Ano', 'Ne, vyzvedneš cestou'],
-                ['Fronta', 'Může se stát', 'U pokladny ne', 'Bez fronty u pokladny'],
-                ['Kdy se to hodí', 'Když máš čas nakoupit', 'Když jsi doma', 'Po směně, cestou z práce, s dětmi'],
-              ].map(([label, store, delivery, mynuta]) => <div className="comparison-row" role="row" key={label}><div className="comparison-label" role="rowheader">{label}</div><div data-label="Běžný obchod" role="cell">{store}</div><div data-label="Rozvoz domů" role="cell">{delivery}</div><div data-label="MYNUTA" role="cell" className="mynuta-column">{mynuta}</div></div>)}
+              {comparisonRows.map(([label, store, delivery, mynuta]) => <div className="comparison-row" role="row" key={label}><div className="comparison-label" role="rowheader">{label}</div><div data-label="Běžný obchod" role="cell">{store}</div><div data-label="Rozvoz domů" role="cell">{delivery}</div><div data-label="MYNUTA" role="cell" className="mynuta-column">{mynuta}</div></div>)}
             </div>
           </div>
         </section>
 
         <section className="people-section wrap">
-          <div className="section-heading"><span className="section-label">PRO KOHO TO JE</span><h2>Pro tvůj běžný den</h2></div>
-          <div className="people-grid">{[
-            ['Po ranní směně', 'Cestou domů vyzvedneš, co ti chybí.'],
-            ['Cestou z práce', 'Nákup už na tebe čeká.'],
-            ['S dětmi', 'Méně postávání, rychle zpátky venku.'],
-            ['Bez front', 'Když chceš nakoupit a pokračovat dál.'],
-          ].map(([title, text], index) => <article className="people-item" key={title}><span className="people-index">0{index + 1}</span><h3>{title}</h3><p>{text}</p></article>)}</div>
+          <div className="section-heading"><span className="section-label">PRO KOHO TO JE</span><h2>Pro tvůj běžný den</h2><p>Otevřeno máme ve všední dny odpoledne a v sobotu dopoledne. Nákup si vezmeš, kdy jdeš kolem.</p></div>
+          <div className="people-grid">{dayMoments.map(([time, title, text]) => <article className="people-item" key={title}><span className="people-index">{time}</span><h3>{title}</h3><p>{text}</p></article>)}</div>
         </section>
 
         <section className="goods-section">
-          <div className="wrap goods-inner"><div className="section-heading"><span className="section-label">NA KAŽDÝ TÝDEN</span><h2>Co u nás koupíš</h2><p>Nejsme supermarket. Budeme mít hlavně to, co lidé kupují každý týden.</p></div><div className="goods-list">{categories.map(([name, examples], index) => <div className="goods-row" key={name}><span>0{index + 1}</span><strong>{name}</strong><small>{examples}</small></div>)}</div></div>
+          <div className="wrap goods-inner"><div className="section-heading"><span className="section-label">NA KAŽDÝ DEN</span><h2>Co u nás koupíš</h2><p>Nejsme supermarket. Budeme mít zhruba 500 věcí, které lidé kupují nejčastěji. Co je skladem, připravíme ještě týž den, ostatní objednáme na další den.</p></div><div className="goods-list">{categories.map(([name, examples], index) => <div className="goods-row" key={name}><span>0{index + 1}</span><strong>{name}</strong><small>{examples}</small></div>)}<div className="goods-row goods-row-order"><span>+</span><strong>Na objednávku</strong><small>Dražší a méně obvyklé zboží, připravené další den</small></div></div></div>
         </section>
 
         <section className="place-section wrap" id="kde-a-kdy">
-          <div className="place-copy"><span className="section-label">BLÍZKO DOMOVA</span><h2>Kde a kdy</h2><p className="place-name"><MapPin size={21} /> Plzeň-Slovany</p><p>Přesnou adresu zveřejníme po podpisu smlouvy.</p><div className="opening-hours"><div><strong>Po–Pá</strong><span>14:00–20:00</span></div><div><strong>Sobota</strong><span>9:00–12:00</span></div><div><strong>Neděle</strong><span>Zavřeno</span></div></div></div>
+          <div className="place-copy"><span className="section-label">BLÍZKO DOMOVA</span><h2>Kde a kdy</h2><p className="place-name"><MapPin size={21} /> Plzeň-Slovany</p><p>Hned u tramvajové zastávky. Přesnou adresu zveřejníme po podpisu smlouvy.</p><div className="opening-hours"><div><strong>Po–Pá</strong><span>14:00–20:00</span></div><div><strong>Sobota</strong><span>9:00–12:00</span></div><div><strong>Neděle</strong><span>Zavřeno</span></div></div><p className="place-note">Co máme skladem, připravíme do 30 minut a dáme ti vědět e-mailem. Termíny dnešního výdeje uvidíš při objednání.</p></div>
           <div className="place-art" aria-hidden="true"><div className="place-map"><span className="map-road map-road-one" /><span className="map-road map-road-two" /><span className="map-park" /><span className="map-pin"><MapPin size={23} /></span><span className="map-label">SLOVANY</span></div><span className="place-art-note">Malá výdejna.<br />Velká úspora času.</span></div>
         </section>
 
         <section className="timeline-section">
-          <div className="wrap"><div className="section-heading"><span className="section-label">KDE PROJEKT JE</span><h2>Nejdřív prostor, pak výdejna.</h2></div>
-            <div className="project-timeline"><article><span className="timeline-dot timeline-current" /><span className="timeline-date">ŘÍJEN–LISTOPAD 2026</span><h3>Zjišťujeme zájem a hledáme prostor</h3><small>Právě teď</small></article><article><span className="timeline-dot" /><span className="timeline-date">PROSINEC 2026</span><h3>Příprava prostoru</h3></article><article><span className="timeline-dot" /><span className="timeline-date">LEDEN 2027</span><h3>Otevření</h3><small>Plán</small></article></div>
+          <div className="wrap"><div className="section-heading"><span className="section-label">KDE PROJEKT JE</span><h2>Nejdřív zájem, pak výdejna.</h2></div>
+            <div className="project-timeline">{timelineSteps.map(({ date, title, text, status, current }) => <article key={date}><span className={`timeline-dot${current ? ' timeline-current' : ''}`} /><span className="timeline-date">{date}</span><h3>{title}</h3><p className="timeline-text">{text}</p>{status && <small>{status}</small>}</article>)}</div>
           </div>
         </section>
 
         <section className="interest-section wrap" id="zajemci">
-          <div className="interest-copy"><span className="section-label">POMOZ NÁM ZAČÍT</span><h2>Chceš vědět, až otevřeme?</h2><p>Zjišťujeme, jestli by se ti taková výdejna hodila. Přihlaš se a my tě budeme informovat o otevření.</p></div>
+          <div className="interest-copy"><span className="section-label">POMOZ NÁM ZAČÍT</span><h2>Chceš MYNUTU na Slovanech?</h2><p>Výdejnu otevřeme, když o ni bude dost zájmu. Zápis nic nestojí a k ničemu tě nezavazuje.</p><ul className="interest-benefits">{interestBenefits.map((benefit) => <li key={benefit}><span><Check size={13} /></span>{benefit}</li>)}</ul></div>
           <form className="interest-demo" onSubmit={handleInterestSubmit}>
-            <span className="demo-badge"><span /> Přihlášení k novinkám</span>
+            <span className="demo-badge"><span /> Zápis zájemců</span>
             <label htmlFor="interest-email">Tvůj e-mail</label>
             <input id="interest-email" type="email" value={interestEmail} onChange={(event) => setInterestEmail(event.target.value)} placeholder="ty@email.cz" aria-describedby="interest-note" required />
             <div className="interest-actions">
-              <button type="submit" className="button-primary" disabled={interestState === 'submitting'}>{interestState === 'submitting' ? 'Odesílám...' : 'Přihlásit se'} <ArrowRight size={16} /></button>
+              <button type="submit" className="button-primary" disabled={interestState === 'submitting'}>{interestState === 'submitting' ? 'Odesílám…' : 'Chci vědět o otevření'} <ArrowRight size={16} /></button>
             </div>
             {interestMessage && <small className={`interest-message ${interestState}`}>{interestMessage}</small>}
-            <small id="interest-note">Své kontaktní údaje používáme jen k informování o otevření a novinkách z MYNUTA.</small>
+            <small id="interest-note">Zápisem souhlasíš se zasíláním zpráv o otevření a novinkách MYNUTY. Souhlas můžeš kdykoli odvolat. Podrobnosti najdeš níže v častých otázkách.</small>
           </form>
         </section>
 
         <section className="faq-section wrap">
           <div className="section-heading"><span className="section-label">NA CO SE MOŽNÁ PTÁŠ</span><h2>Časté otázky</h2></div>
-          <div className="faq-list">{faqs.map(([question, answer]) => <details key={question}><summary>{question}<ChevronDown size={18} /></summary><p>{answer}</p></details>)}</div>
+          <div className="faq-list">{faqs.map(({ id, question, answer }) => <details key={question} id={id}><summary>{question}<ChevronDown size={18} /></summary><p>{answer}</p></details>)}</div>
         </section>
       </main>
 
-      <footer className="public-footer"><div className="wrap"><Brand /><span>Plzeň-Slovany · Otevření plánujeme na leden 2027</span><a href="#nahoru">Zpátky nahoru ↑</a></div></footer>
+      <footer className="public-footer"><div className="wrap"><Brand /><span>Plzeň-Slovany · Otevření plánujeme na leden 2027 · {contactLink}</span><a href="#nahoru">Zpátky nahoru ↑</a></div></footer>
     </div>
   )
 }

@@ -341,7 +341,7 @@ function App() {
       <header className="topbar">
         <button className="brand-lockup" type="button" onClick={() => { setMode('shop'); setCategory('Vše') }} aria-label="MYNUTA, přejít na nákup">
           <span className="brand-word"><span>m</span><span className="brand-clock" aria-hidden="true"><span className="clock-arm clock-left" /><span className="clock-arm clock-right" /><span className="clock-arm clock-stem" /></span><span>nuta</span></span>
-          <span className="brand-tagline">Rychle, levně – do Mynuty</span>
+          <span className="brand-tagline">Rychle – do Mynuty</span>
         </button>
         <label className="global-search">
           <Search size={17} />
@@ -420,7 +420,7 @@ function App() {
                 </article>
               })}
             </div> : <div className="empty-products"><Search size={27} /><strong>Nic jsme nenašli</strong><span>Zkus upravit hledání nebo vybrat jinou kategorii.</span><button onClick={() => { setSearch(''); setCategory('Vše'); setDealOnly(false) }}>Zobrazit vše</button></div>}
-            <footer className="shop-footer"><span>MYNUTA · hlavní výdejní místo</span><span>Rychle, levně – do Mynuty <span className="footer-clock">◷</span></span></footer>
+            <footer className="shop-footer"><span>MYNUTA · hlavní výdejní místo</span><span>Rychle – do Mynuty <span className="footer-clock">◷</span></span></footer>
           </main>
 
           <aside className="cart-panel">
