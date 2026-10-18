@@ -2,17 +2,19 @@ import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'rea
 import {
   ArrowRight,
   Check,
+  Clock,
   ChevronDown,
   MapPin,
   Minus,
   Plus,
+  ShoppingBasket,
 } from 'lucide-react'
 import './PublicLanding.css'
 import { playBagIntro, type BagIntro } from './heroBagIntro'
 
 import kartaIcon from './assets/icons/svg-svetle/karta.svg'
 import qrIcon from './assets/icons/svg-svetle/qr.svg'
-import hodinyIcon from './assets/icons/svg-svetle/hodiny.svg'
+import mobilIcon from './assets/icons/svg-svetle/mobil.svg'
 import pecivoIcon from './assets/icons/svg-svetle/pecivo.svg'
 import mlekoIcon from './assets/icons/svg-svetle/mleko.svg'
 import vejceIcon from './assets/icons/svg-svetle/vejce.svg'
@@ -20,7 +22,6 @@ import ovoceIcon from './assets/icons/svg-svetle/ovoce.svg'
 import zeleninaIcon from './assets/icons/svg-svetle/zelenina.svg'
 import masoIcon from './assets/icons/svg-svetle/maso.svg'
 import napojeIcon from './assets/icons/svg-svetle/napoje.svg'
-import mobilIcon from './assets/icons/svg-svetle/mobil.svg'
 import bagPekarna from './assets/bags/mynuta-taska-papirova/svg/taska-papirova-pekarna.svg'
 import bagSnidane from './assets/bags/mynuta-taska-papirova/svg/taska-papirova-snidane.svg'
 import bagTrh from './assets/bags/mynuta-taska-papirova/svg/taska-papirova-trh.svg'
@@ -52,35 +53,11 @@ const demoItems: DemoItem[] = [
   { name: 'Káva', icon: napojeIcon },
 ]
 
-const categories = [
-  ['Pečivo', 'Rohlíky, chléb, sladké pečivo'],
-  ['Mléčné výrobky a vejce', 'Mléko, jogurty, máslo, vejce'],
-  ['Maso, uzeniny a sýry', 'Balené maso, šunka, eidam'],
-  ['Ovoce a zelenina', 'Jablka, banány, rajčata'],
-  ['Nápoje', 'Voda, limonády, džusy'],
-  ['Trvanlivé potraviny', 'Těstoviny, rýže, konzervy, káva'],
-  ['Základní drogerie', 'Toaletní papír, mýdlo, zubní pasta'],
-]
-
 const commonCzechSurnames = [
   'Novák', 'Svoboda', 'Novotný', 'Dvořák', 'Černý',
   'Procházka', 'Kučera', 'Veselý', 'Horák', 'Němec',
   'Marek', 'Pospíšil', 'Pokorný', 'Hájek', 'Jelínek',
   'Král', 'Růžička', 'Beneš', 'Fiala', 'Sedláček',
-]
-
-type FlowOption = { title: string; hint: string }
-
-const orderMoments: FlowOption[] = [
-  { title: 'Týdenní nákup z gauče', hint: 'Sestavíš ho v klidu doma.' },
-  { title: 'Doobjednej o pauze v práci', hint: 'Pár klepnutí a máš hotovo.' },
-  { title: 'Sestav ho na počítači', hint: 'Velká obrazovka, žádný spěch.' },
-  { title: 'Už je někdo na cestě?', hint: 'Pošli mu QR kód a nákup vyzvedne za tebe.' },
-]
-
-const paymentMoments: FlowOption[] = [
-  { title: 'Zaplať online', hint: 'Předem, na místě už nic neřešíš.' },
-  { title: 'Zaplať na místě', hint: 'Po jednoduché registraci.' },
 ]
 
 const ticketTimeOptions = Array.from({ length: 13 }, (_, index) => `${String(index + 8).padStart(2, '0')}:00`)
@@ -162,63 +139,6 @@ function Brand() {
       <img src={publicAsset('mynuta-logo.svg')} alt="MYNUTA" />
       <span className="public-brand-tagline">rychle – do mynuty</span>
     </a>
-  )
-}
-
-function FlowIcon({ kind }: { kind: 'phone' | 'pay' | 'clock' }) {
-  const iconMap = {
-    phone: mobilIcon,
-    pay: kartaIcon,
-    clock: hodinyIcon,
-  }
-  return <img src={iconMap[kind]} alt="" aria-hidden="true" className="flow-custom-icon" />
-}
-
-function FlowChoice({ number, kind, options, autoRotateMs }: {
-  number: string
-  kind: 'phone' | 'pay' | 'clock'
-  options: FlowOption[]
-  autoRotateMs?: number
-}) {
-  const [index, setIndex] = useState(0)
-  const [touched, setTouched] = useState(false)
-  const [paused, setPaused] = useState(false)
-
-  useEffect(() => {
-    if (!autoRotateMs || touched || paused || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const timer = window.setInterval(() => setIndex((current) => (current + 1) % options.length), autoRotateMs)
-    return () => window.clearInterval(timer)
-  }, [autoRotateMs, touched, paused, options.length])
-
-  const current = options[index]
-
-  return (
-    <button
-      type="button"
-      className="flow-step flow-choice"
-      aria-label={`${number}. ${current.title}. ${current.hint} Klepnutím změníš variantu.`}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocus={() => setPaused(true)}
-      onBlur={() => setPaused(false)}
-      onClick={() => {
-        setTouched(true)
-        setIndex((value) => (value + 1) % options.length)
-      }}
-    >
-      <span className="flow-icon">
-        <FlowIcon kind={kind} />
-      </span>
-      <span className="flow-text">
-        <small>{number}</small>
-        <strong key={`title-${index}`} className="flow-swap">{current.title}</strong>
-        <span key={`hint-${index}`} className="flow-hint flow-swap">{current.hint}</span>
-        <span className="flow-footer">
-          <span className="flow-dots" aria-hidden="true">{options.map((option, optionIndex) => <i key={option.title} className={optionIndex === index ? 'active' : ''} />)}</span>
-          <span className="flow-change" aria-hidden="true">Změnit</span>
-        </span>
-      </span>
-    </button>
   )
 }
 
@@ -416,8 +336,8 @@ function PublicLanding() {
         <section className="public-hero wrap" aria-labelledby="hero-title">
           <div className="hero-copy">
             <span className="hero-eyebrow"><span /> NOVÁ VÝDEJNA V PLZNI-SLOVANECH</span>
-            <h1 id="hero-title">Nákup objednáš cestou, vyzvedneš za minutu.</h1>
-            <p>Objednáš předem a tašku si cestou vyzvedneš na Slovanech. Otevření plánujeme na leden 2027.</p>
+            <h1 id="hero-title">Objednej v klidu. Vyzvedni za minutu.</h1>
+            <p>Otevření plánujeme na leden 2027.</p>
           </div>
           <div className="hero-visual">
             <div className="hero-mark">
@@ -552,12 +472,12 @@ function PublicLanding() {
               </div>
             </div>
           </div>
-          <div className="hero-flow" aria-label="Sestav nákup, zaplať a vyzvedni za minutu">
-            <FlowChoice number="01 · VÝBĚR" kind="phone" options={orderMoments} autoRotateMs={4200} />
-            <span className="flow-arrow" aria-hidden="true"><ArrowRight size={18} /></span>
-            <FlowChoice number="02 · PLATBA" kind="pay" options={paymentMoments} />
-            <span className="flow-arrow" aria-hidden="true"><ArrowRight size={18} /></span>
-            <div className="flow-step flow-step-final"><span className="flow-icon"><FlowIcon kind="clock" /></span><span className="flow-text"><small>03 · HOTOVO</small><strong>Vyzvedni za minutu</strong><span className="flow-hint">Taška už čeká.</span></span></div>
+          <div className="hero-flow" role="list" aria-label="Tři kroky nákupu">
+            <div className="flow-step" role="listitem"><span className="flow-icon"><img src={mobilIcon} alt="" aria-hidden="true" className="flow-custom-icon" /></span><strong>Objednej</strong></div>
+            <ArrowRight className="flow-arrow" size={18} aria-hidden="true" />
+            <div className="flow-step" role="listitem"><span className="flow-icon"><img src={kartaIcon} alt="" aria-hidden="true" className="flow-custom-icon" /></span><strong>Zaplať</strong></div>
+            <ArrowRight className="flow-arrow" size={18} aria-hidden="true" />
+            <div className="flow-step" role="listitem"><span className="flow-icon"><img src={qrIcon} alt="" aria-hidden="true" className="flow-custom-icon" /></span><strong>Vyzvedni</strong></div>
           </div>
         </section>
 
@@ -631,14 +551,15 @@ function PublicLanding() {
         </section>
 
         <section className="goods-section" id="kde-a-kdy">
-          <div className="wrap goods-inner">
-            <div className="section-heading"><span className="section-label">NABÍDKA A VÝDEJ</span><h2>Běžný nákup, cestou domů.</h2><p>Zhruba 500 věcí na každý den. Co je skladem, připravíme do 30 minut.</p><p className="goods-category-summary">{categories.map(([name]) => name).join(' · ')}</p></div>
-            <div className="place-copy"><p className="place-name"><MapPin size={19} /> Plzeň-Slovany</p><p>U tramvajové zastávky. Přesnou adresu zveřejníme po podpisu smlouvy.</p><p className="opening-hours-summary">Po–Pá 8:00–20:00 · So 9:00–12:00 · Ne zavřeno</p><p className="place-note">Objednej nejpozději 30 minut před zavřením. O připravení tašky ti dáme vědět e-mailem.</p></div>
+          <div className="wrap goods-facts">
+            <h2 className="goods-facts-label section-label">NABÍDKA A VÝDEJ</h2>
+            <div className="goods-fact"><ShoppingBasket size={26} strokeWidth={1.8} aria-hidden="true" /><p><strong>~500</strong><span>věcí na každý den</span></p></div>
+            <div className="goods-fact"><Clock size={26} strokeWidth={1.8} aria-hidden="true" /><p><strong>Do 30 minut</strong><span>připravíme zboží skladem</span></p></div>
           </div>
         </section>
 
         <section className="interest-section wrap" id="zajemci">
-          <div className="interest-copy"><span className="section-label">AKTUÁLNĚ SBÍRÁME ZÁJEMCE</span><h2>Pomoz nám otevřít MYNUTU.</h2><p>Jednáme o prostoru na Slovanech a výdejnu otevřeme, když o ni bude dost zájmu. Zapsaným pošleme datum i přesnou adresu jako prvním.</p></div>
+          <div className="interest-copy"><span className="section-label">AKTUÁLNĚ SBÍRÁME ZÁJEMCE</span><h2>Pomoz nám otevřít MYNUTU.</h2><p>Jednáme o prostoru na Slovanech a plánujeme otevřít v lednu 2027. Zapiš se a dostaneš datum i adresu jako první.</p></div>
           <form className="interest-demo" onSubmit={handleInterestSubmit}>
             <span className="demo-badge"><span /> Zápis zájemců</span>
             <label htmlFor="interest-email">Tvůj e-mail</label>
