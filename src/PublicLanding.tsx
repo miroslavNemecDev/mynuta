@@ -10,9 +10,8 @@ import {
 import './PublicLanding.css'
 import { playBagIntro, type BagIntro } from './heroBagIntro'
 
-import pripravenaTaskaIcon from './assets/icons/svg-svetle/pripravena-taska.svg'
-import qrIcon from './assets/icons/svg-svetle/qr.svg'
 import kartaIcon from './assets/icons/svg-svetle/karta.svg'
+import qrIcon from './assets/icons/svg-svetle/qr.svg'
 import hodinyIcon from './assets/icons/svg-svetle/hodiny.svg'
 import pecivoIcon from './assets/icons/svg-svetle/pecivo.svg'
 import mlekoIcon from './assets/icons/svg-svetle/mleko.svg'
@@ -63,31 +62,6 @@ const categories = [
   ['Základní drogerie', 'Toaletní papír, mýdlo, zubní pasta'],
 ]
 
-const comparisonRows = [
-  ['Kolik času tě nákup stojí', 'Regály a fronta u pokladny', 'Čekání doma na kurýra', 'Minuta u výdeje'],
-  ['Musíš být doma?', 'Ne', 'Ano, v domluveném čase', 'Ne, vyzvedneš cestou'],
-  ['Fronta u pokladny', 'Hlavně ve špičce', 'Žádná', 'Žádná, taška už čeká'],
-]
-
-const dayMoments = [
-  ['14:00–16:00', 'Po ranní směně', 'Objednáš ještě v šatně a cestou z tramvaje si tašku vezmeš.'],
-  ['16:00–20:00', 'Cestou z práce', 'Objednáš před odchodem z práce. Doma už jen vybalíš.'],
-  ['9:00–12:00', 'V sobotu s dětmi', 'Žádná fronta a žádný regál se sladkostmi u pokladny.'],
-  ['30 min před zavřením', 'Na poslední chvíli', 'Chybí ti něco na večeři? Skladové věci připravíme ještě dnes.'],
-]
-
-const timelineSteps = [
-  { date: 'ŘÍJEN–LISTOPAD 2026', title: 'Sbíráme zájemce a jednáme o prostoru', text: 'Výdejna vznikne, když o ni bude na Slovanech zájem. Každý zápis se počítá.', status: 'Právě teď', current: true },
-  { date: 'PROSINEC 2026', title: 'Stavíme výdejnu', text: 'Podpis nájmu, lednice a regály. Ze zapsaných pozveme první hosty na zkušební výdej.', status: '', current: false },
-  { date: 'LEDEN 2027', title: 'Otevíráme', text: 'Přesné datum pošleme nejdřív zapsaným.', status: 'Plán', current: false },
-]
-
-const interestBenefits = [
-  'Datum otevření se dozvíš jako první.',
-  'Ze zapsaných pozveme první hosty na zkušební výdej.',
-  'Přesnou adresu pošleme hned po podpisu smlouvy.',
-]
-
 const commonCzechSurnames = [
   'Novák', 'Svoboda', 'Novotný', 'Dvořák', 'Černý',
   'Procházka', 'Kučera', 'Veselý', 'Horák', 'Němec',
@@ -101,7 +75,7 @@ const orderMoments: FlowOption[] = [
   { title: 'Týdenní nákup z gauče', hint: 'Sestavíš ho v klidu doma.' },
   { title: 'Doobjednej o pauze v práci', hint: 'Pár klepnutí a máš hotovo.' },
   { title: 'Sestav ho na počítači', hint: 'Velká obrazovka, žádný spěch.' },
-  { title: 'Partner už je na cestě', hint: 'Objednáš předem. Nemusí řešit mobil za jízdy ani čekat v obchodě.' },
+  { title: 'Už je někdo na cestě?', hint: 'Pošli mu QR kód a nákup vyzvedne za tebe.' },
 ]
 
 const paymentMoments: FlowOption[] = [
@@ -109,38 +83,22 @@ const paymentMoments: FlowOption[] = [
   { title: 'Zaplať na místě', hint: 'Po jednoduché registraci.' },
 ]
 
-const ticketTimeOptions = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00']
+const ticketTimeOptions = Array.from({ length: 13 }, (_, index) => `${String(index + 8).padStart(2, '0')}:00`)
 
 function pickRandomTime(current: string) {
   const candidates = ticketTimeOptions.filter((time) => time !== current)
   return candidates[Math.floor(Math.random() * candidates.length)]
 }
 
-const minuteEvents = [
-  {
-    title: 'Ukážeš QR kód nebo řekneš kód',
-    description: 'Ověříme tvoji objednávku u výdejny.',
-    icon: qrIcon,
-  },
-  {
-    title: 'Vezmeš si připravenou tašku',
-    description: 'Nákup už na tebe čeká. A můžeš jít.',
-    icon: pripravenaTaskaIcon,
-  },
-]
-
 const contactEmail = 'info@mynuta.cz'
 const contactLink = <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
 
 const faqs: Faq[] = [
-  { question: 'Za jak dlouho bude nákup připravený?', answer: 'Co máme skladem, nachystáme do 30 minut, často i dřív. Jakmile je taška připravená, pošleme ti e-mail. Časy pro dnešní výdej uvidíš mezi aktuálně dostupnými termíny. Věci, které skladem nemáme, objednáme a připravené jsou nejdřív další otevírací den.' },
+  { question: 'Za jak dlouho bude nákup připravený?', answer: 'Skladové věci připravíme do 30 minut, ostatní nejdřív další otevírací den. O připravení ti pošleme e-mail.' },
   { question: 'Je stanovená minimální objednávka?', answer: 'Zatím ne. Podmínky objednávek i ceník zveřejníme před otevřením.' },
-  { question: 'Jak se bude platit?', answer: 'Nákup zaplatíš online při objednání, na místě už nic neplatíš. Způsoby platby upřesníme před otevřením.' },
-  { question: 'Co když nestihnu vybraný čas?', answer: 'Nevadí. Nákup na tebe počká do konce otevírací doby a chlazené věci zatím zůstanou v lednici. Když nestihneš ani to, napiš nám a domluvíme se na dalším dni.' },
+  { question: 'Do kdy můžu objednat a co když nestihnu vyzvednutí?', answer: 'Objednat můžeš nejpozději 30 minut před zavřením. Pokud nestihneš vybraný čas, nákup na tebe počká do konce otevírací doby a chlazené věci zůstanou v lednici. Když výdej nestihneš vůbec, ozvi se nám. Možnost zrušení objednávky a vrácení peněz posoudíme individuálně.' },
   { question: 'Jak bude zajištěné chlazené zboží?', answer: 'Chlazené a mražené věci čekají až do výdeje v lednici a mrazáku. Teplotu v nich hlídají čidla.' },
   { question: 'Co když s nákupem nebude něco v pořádku?', answer: <>Tašku si můžeš zkontrolovat hned u výdeje. Když na něco přijdeš až doma, napiš na {contactLink}. Chybějící věci ti vrátíme na kartu, vadné vyměníme, nebo vrátíme peníze.</> },
-  { question: 'Kde přesně budete?', answer: 'Na Slovanech, hned u tramvajové zastávky. Přesnou adresu zveřejníme po podpisu smlouvy a zapsaní ji dostanou e-mailem jako první.' },
-  { question: 'Proč máte v neděli zavřeno?', answer: 'Neděle podle nás nemá patřit nákupům. Od pondělí do pátku jsme tu od 14 do 20, v sobotu od 9 do 12.' },
   { id: 'faq-email', question: 'Co uděláte s mým e-mailem?', answer: <>Použijeme ho jen ke zprávám o otevření a novinkám MYNUTY a nikomu ho nedáme. Odhlásit se můžeš kdykoli, stačí napsat na {contactLink}. Kdyby MYNUTA neotevřela, seznam smažeme. Správcem údajů je Miroslav Němec. Máš právo na přístup k údajům, jejich opravu i výmaz a můžeš podat stížnost u Úřadu pro ochranu osobních údajů.</> },
 ]
 
@@ -167,7 +125,7 @@ function getPickupDays(): PickupDay[] {
 }
 
 function makePickupTimes(date: Date) {
-  const startHour = date.getDay() === 6 ? 9 : 14
+  const startHour = date.getDay() === 6 ? 9 : 8
   const endHour = date.getDay() === 6 ? 12 : 20
   const times: string[] = []
   for (let minutes = startHour * 60; minutes <= endHour * 60; minutes += 30) {
@@ -459,7 +417,7 @@ function PublicLanding() {
           <div className="hero-copy">
             <span className="hero-eyebrow"><span /> NOVÁ VÝDEJNA V PLZNI-SLOVANECH</span>
             <h1 id="hero-title">Nákup objednáš cestou, vyzvedneš za minutu.</h1>
-            <p>Malá výdejna potravin na Slovanech pro lidi, kteří nemají čas stát ve frontě. Žádné regály ani fronta u pokladny. Otevření plánujeme na leden 2027.</p>
+            <p>Objednáš předem a tašku si cestou vyzvedneš na Slovanech. Otevření plánujeme na leden 2027.</p>
           </div>
           <div className="hero-visual">
             <div className="hero-mark">
@@ -478,6 +436,8 @@ function PublicLanding() {
                     title="Vyzkoušet objednávku"
                     onClick={() => {
                       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+                      const demo = document.querySelector<HTMLDetailsElement>('#demo .demo-disclosure')
+                      if (demo) demo.open = true
                       document.getElementById('demo')?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
                     }}
                   >
@@ -601,30 +561,11 @@ function PublicLanding() {
           </div>
         </section>
 
-        <section className="minute-section" id="jak-to-funguje">
-          <div className="wrap minute-inner">
-            <div className="section-heading"><span className="section-label">ŽÁDNÉ POSTÁVÁNÍ</span><h2>Tvoje minuta na místě</h2><p>Tašku připravíme předem. Na místě si ji jen vyzvedneš.</p></div>
-            <div className="minute-track">
-              <ol className="minute-events" aria-label="Kroky vyzvednutí">
-                {minuteEvents.map(({ title, description, icon: Icon }, index) => (
-                  <li className="minute-card" key={title}>
-                    <span className="minute-card-icon"><img src={Icon} alt="" aria-hidden="true" className="minute-custom-icon" /></span>
-                    <div className="minute-card-content">
-                      <span className="minute-card-number">0{index + 1} / VYZVEDNUTÍ</span>
-                      <h3 className="minute-card-title">{title}</h3>
-                      <p className="minute-card-description">{description}</p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </div>
-        </section>
-
         <section className="demo-section wrap" id="demo">
-          <div className="section-heading demo-heading"><span className="section-label">MŮŽEŠ SI TO PROJÍT</span><h2>Vyzkoušej si to</h2><p>Je to jen ukázka. Objednávku ani platbu neposíláme.</p></div>
-          <div className="demo-layout">
-            <div className="demo-explainer"><span className="demo-number">01—05</span><h3>Od výběru<br />k připravené tašce.</h3><p>Proklikej si cestu, která tě čeká. Všechno se děje tady na stránce.</p><button className="demo-reset" onClick={beginAgain}><span>↻</span> Začít znovu</button></div>
+          <details className="demo-disclosure">
+            <summary className="demo-disclosure-summary"><span className="demo-summary-copy"><span className="section-label">INTERAKTIVNÍ UKÁZKA</span><strong>Prohlédnout objednávku krok za krokem</strong><small>Nic se neobjedná ani neplatí.</small></span><ChevronDown size={19} aria-hidden="true" /></summary>
+            <div className="demo-layout">
+            <div className="demo-explainer"><span className="demo-number">5 KROKŮ</span><h3>Od výběru k vyzvednutí.</h3><p>Proklikáš si nákup, jak bude fungovat v praxi.</p><button className="demo-reset" onClick={beginAgain}><span>↻</span> Začít znovu</button></div>
             <div className="demo-phone" aria-label="Ukázka objednávky na mobilu">
               <div className="phone-speaker" aria-hidden="true" />
               <div className="phone-screen">
@@ -650,7 +591,7 @@ function PublicLanding() {
                     <button type="button" className={pickupChoice === 'custom' ? 'day-selected' : ''} aria-pressed={pickupChoice === 'custom'} onClick={() => setPickupChoice('custom')}><span>Jiný den</span><strong>Až týden</strong></button>
                   </div>
                   {pickupChoice === 'custom' && <div className="custom-day-picker"><label htmlFor="custom-pickup-day">Den vyzvednutí</label><div className="select-wrap"><select id="custom-pickup-day" value={activeDay?.id ?? ''} onChange={(event) => setCustomDayId(event.target.value)}>{customPickupDays.map((day) => <option key={day.id} value={day.id}>{day.label}, {formatDate(day.date)}</option>)}</select><ChevronDown size={16} /></div></div>}
-                  {activeDay && <div className="time-picker"><label htmlFor="pickup-time">Čas vyzvednutí</label><div className="select-wrap"><select id="pickup-time" value={activeTime} onChange={(event) => setPickupTime(event.target.value)}>{pickupTimes.map((time) => <option key={time} value={time}>{time}</option>)}</select><ChevronDown size={16} /></div><small>{activeDay.date.getDay() === 6 ? 'Sobota · 9:00–12:00' : 'Pondělí–pátek · 14:00–20:00'}</small></div>}
+                  {activeDay && <div className="time-picker"><label htmlFor="pickup-time">Čas vyzvednutí</label><div className="select-wrap"><select id="pickup-time" value={activeTime} onChange={(event) => setPickupTime(event.target.value)}>{pickupTimes.map((time) => <option key={time} value={time}>{time}</option>)}</select><ChevronDown size={16} /></div><small>{activeDay.date.getDay() === 6 ? 'Sobota · 9:00–12:00' : 'Pondělí–pátek · 8:00–20:00'}</small></div>}
                   <div className="demo-bottom"><button className="demo-back" onClick={() => setStage('items')}>Zpět</button><button className="demo-next" onClick={() => setStage('pay')} disabled={!activeTime}>Pokračovat <ArrowRight size={16} /></button></div>
                 </div>}
 
@@ -686,40 +627,18 @@ function PublicLanding() {
               <span className="phone-home" aria-hidden="true" />
             </div>
           </div>
+          </details>
         </section>
 
-        <section className="difference-section">
-          <div className="wrap">
-            <div className="section-heading"><span className="section-label">JINÝ ZPŮSOB NÁKUPU</span><h2>Čím se MYNUTA liší</h2></div>
-            <div className="comparison" role="table" aria-label="Srovnání způsobů nákupu">
-              <div className="comparison-row comparison-head" role="row"><div role="columnheader"> </div><div role="columnheader">Běžný obchod</div><div role="columnheader">Rozvoz domů</div><div role="columnheader" className="mynuta-column">MYNUTA</div></div>
-              {comparisonRows.map(([label, store, delivery, mynuta]) => <div className="comparison-row" role="row" key={label}><div className="comparison-label" role="rowheader">{label}</div><div data-label="Běžný obchod" role="cell">{store}</div><div data-label="Rozvoz domů" role="cell">{delivery}</div><div data-label="MYNUTA" role="cell" className="mynuta-column">{mynuta}</div></div>)}
-            </div>
-          </div>
-        </section>
-
-        <section className="people-section wrap">
-          <div className="section-heading"><span className="section-label">PRO KOHO TO JE</span><h2>Pro tvůj běžný den</h2><p>Otevřeno máme ve všední dny odpoledne a v sobotu dopoledne. Nákup si vezmeš, kdy jdeš kolem.</p></div>
-          <div className="people-grid">{dayMoments.map(([time, title, text]) => <article className="people-item" key={title}><span className="people-index">{time}</span><h3>{title}</h3><p>{text}</p></article>)}</div>
-        </section>
-
-        <section className="goods-section">
-          <div className="wrap goods-inner"><div className="section-heading"><span className="section-label">NA KAŽDÝ DEN</span><h2>Co u nás koupíš</h2><p>Nejsme supermarket. Budeme mít zhruba 500 věcí, které lidé kupují nejčastěji. Co je skladem, připravíme ještě týž den, ostatní objednáme na další den.</p></div><div className="goods-list">{categories.map(([name, examples], index) => <div className="goods-row" key={name}><span>0{index + 1}</span><strong>{name}</strong><small>{examples}</small></div>)}<div className="goods-row goods-row-order"><span>+</span><strong>Na objednávku</strong><small>Dražší a méně obvyklé zboží, připravené další den</small></div></div></div>
-        </section>
-
-        <section className="place-section wrap" id="kde-a-kdy">
-          <div className="place-copy"><span className="section-label">BLÍZKO DOMOVA</span><h2>Kde a kdy</h2><p className="place-name"><MapPin size={21} /> Plzeň-Slovany</p><p>Hned u tramvajové zastávky. Přesnou adresu zveřejníme po podpisu smlouvy.</p><div className="opening-hours"><div><strong>Po–Pá</strong><span>14:00–20:00</span></div><div><strong>Sobota</strong><span>9:00–12:00</span></div><div><strong>Neděle</strong><span>Zavřeno</span></div></div><p className="place-note">Co máme skladem, připravíme do 30 minut a dáme ti vědět e-mailem. Termíny dnešního výdeje uvidíš při objednání.</p></div>
-          <div className="place-art" aria-hidden="true"><div className="place-map"><span className="map-road map-road-one" /><span className="map-road map-road-two" /><span className="map-park" /><span className="map-pin"><MapPin size={23} /></span><span className="map-label">SLOVANY</span></div><span className="place-art-note">Malá výdejna.<br />Velká úspora času.</span></div>
-        </section>
-
-        <section className="timeline-section">
-          <div className="wrap"><div className="section-heading"><span className="section-label">KDE PROJEKT JE</span><h2>Nejdřív zájem, pak výdejna.</h2></div>
-            <div className="project-timeline">{timelineSteps.map(({ date, title, text, status, current }) => <article key={date}><span className={`timeline-dot${current ? ' timeline-current' : ''}`} /><span className="timeline-date">{date}</span><h3>{title}</h3><p className="timeline-text">{text}</p>{status && <small>{status}</small>}</article>)}</div>
+        <section className="goods-section" id="kde-a-kdy">
+          <div className="wrap goods-inner">
+            <div className="section-heading"><span className="section-label">NABÍDKA A VÝDEJ</span><h2>Běžný nákup, cestou domů.</h2><p>Zhruba 500 věcí na každý den. Co je skladem, připravíme do 30 minut.</p><p className="goods-category-summary">{categories.map(([name]) => name).join(' · ')}</p></div>
+            <div className="place-copy"><p className="place-name"><MapPin size={19} /> Plzeň-Slovany</p><p>U tramvajové zastávky. Přesnou adresu zveřejníme po podpisu smlouvy.</p><p className="opening-hours-summary">Po–Pá 8:00–20:00 · So 9:00–12:00 · Ne zavřeno</p><p className="place-note">Objednej nejpozději 30 minut před zavřením. O připravení tašky ti dáme vědět e-mailem.</p></div>
           </div>
         </section>
 
         <section className="interest-section wrap" id="zajemci">
-          <div className="interest-copy"><span className="section-label">POMOZ NÁM ZAČÍT</span><h2>Chceš MYNUTU na Slovanech?</h2><p>Výdejnu otevřeme, když o ni bude dost zájmu. Zápis nic nestojí a k ničemu tě nezavazuje.</p><ul className="interest-benefits">{interestBenefits.map((benefit) => <li key={benefit}><span><Check size={13} /></span>{benefit}</li>)}</ul></div>
+          <div className="interest-copy"><span className="section-label">AKTUÁLNĚ SBÍRÁME ZÁJEMCE</span><h2>Pomoz nám otevřít MYNUTU.</h2><p>Jednáme o prostoru na Slovanech a výdejnu otevřeme, když o ni bude dost zájmu. Zapsaným pošleme datum i přesnou adresu jako prvním.</p></div>
           <form className="interest-demo" onSubmit={handleInterestSubmit}>
             <span className="demo-badge"><span /> Zápis zájemců</span>
             <label htmlFor="interest-email">Tvůj e-mail</label>
