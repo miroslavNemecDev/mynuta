@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import {
   ArrowRight,
+  CalendarDays,
   Check,
   Clock,
   ChevronDown,
@@ -61,6 +62,7 @@ const commonCzechSurnames = [
 ]
 
 const ticketTimeOptions = Array.from({ length: 13 }, (_, index) => `${String(index + 8).padStart(2, '0')}:00`)
+const orderLocations = ['doma', 'v tramvaji', 'v práci']
 
 function pickRandomTime(current: string) {
   const candidates = ticketTimeOptions.filter((time) => time !== current)
@@ -143,6 +145,7 @@ function Brand() {
 }
 
 function PublicLanding() {
+  const [orderLocationIndex, setOrderLocationIndex] = useState(0)
   const [stage, setStage] = useState<DemoStage>('items')
   const [quantities, setQuantities] = useState<number[]>(demoItems.map(() => 0))
   const [pickupChoice, setPickupChoice] = useState<'first' | 'second' | 'custom'>('first')
@@ -186,6 +189,14 @@ function PublicLanding() {
   const timerLabel = `${Math.floor(timerSeconds / 60)}:${String(timerSeconds % 60).padStart(2, '0')}`
 
   useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const timer = window.setInterval(() => {
+      setOrderLocationIndex((current) => (current + 1) % orderLocations.length)
+    }, 2400)
+    return () => window.clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
     if (stage !== 'pickup' || startedAt === null) return
     const timer = window.setInterval(() => {
       const nextElapsed = Date.now() - startedAt
@@ -210,13 +221,13 @@ function PublicLanding() {
       .then((markup) => {
         if (cancelled) return
         mount.innerHTML = markup
+        setIntroDone(true)
+        setTicketTimeShown(true)
         if (reduceMotion) {
-          setIntroDone(true)
           return
         }
         intro = playBagIntro(
           mount,
-          () => { if (!cancelled) setIntroDone(true) },
           () => {
             if (cancelled) return
             setSurnameIndex((current) => (current + 1) % commonCzechSurnames.length)
@@ -336,8 +347,14 @@ function PublicLanding() {
         <section className="public-hero wrap" aria-labelledby="hero-title">
           <div className="hero-copy">
             <span className="hero-eyebrow"><span /> NOVÁ VÝDEJNA V PLZNI-SLOVANECH</span>
-            <h1 id="hero-title">Objednej v klidu. Vyzvedni za minutu.</h1>
-            <p>Otevření plánujeme na leden 2027.</p>
+            <h1 id="hero-title" aria-label="Objednej doma, v tramvaji nebo v práci. Vyzvedni za minutu.">
+              <span className="hero-title-line hero-title-order" aria-hidden="true">Objednej <span key={orderLocationIndex} className="hero-title-location">{orderLocations[orderLocationIndex]}</span></span>
+              <span className="hero-title-line hero-title-order" aria-hidden="true">Vyzvedni za minutu.</span>
+            </h1>
+            <div className="hero-launch">
+              <span className="hero-launch-icon"><CalendarDays size={20} aria-hidden="true" /></span>
+              <span><small>PLÁNOVANÉ OTEVŘENÍ</small><strong>Leden 2027</strong></span>
+            </div>
           </div>
           <div className="hero-visual">
             <div className="hero-mark">
@@ -353,7 +370,7 @@ function PublicLanding() {
                     type="button"
                     className="bag-phone"
                     aria-label="Vyzkoušet ukázkovou objednávku"
-                    title="Vyzkoušet objednávku"
+                    title="Zobrazit objednávku"
                     onClick={() => {
                       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
                       const demo = document.querySelector<HTMLDetailsElement>('#demo .demo-disclosure')
@@ -559,13 +576,13 @@ function PublicLanding() {
         </section>
 
         <section className="interest-section wrap" id="zajemci">
-          <div className="interest-copy"><span className="section-label">AKTUÁLNĚ SBÍRÁME ZÁJEMCE</span><h2>Pomoz nám otevřít MYNUTU.</h2><p>Jednáme o prostoru na Slovanech a plánujeme otevřít v lednu 2027. Zapiš se a dostaneš datum i adresu jako první.</p></div>
+          <div className="interest-copy"><span className="section-label">MYNUTA MÍŘÍ NA SLOVANY</span><h2>Buď u toho od začátku.</h2><p>Připravujeme výdejnu na Slovanech s cílem otevřít v lednu 2027. Nech nám e-mail — pošleme ti zprávu, jakmile potvrdíme adresu a datum otevření.</p></div>
           <form className="interest-demo" onSubmit={handleInterestSubmit}>
-            <span className="demo-badge"><span /> Zápis zájemců</span>
+            <span className="demo-badge"><span /> Zpráva hned při otevření</span>
             <label htmlFor="interest-email">Tvůj e-mail</label>
             <input id="interest-email" type="email" value={interestEmail} onChange={(event) => setInterestEmail(event.target.value)} placeholder="ty@email.cz" aria-describedby="interest-note" required />
             <div className="interest-actions">
-              <button type="submit" className="button-primary" disabled={interestState === 'submitting'}>{interestState === 'submitting' ? 'Odesílám…' : 'Chci vědět o otevření'} <ArrowRight size={16} /></button>
+              <button type="submit" className="button-primary" disabled={interestState === 'submitting'}>{interestState === 'submitting' ? 'Odesílám…' : 'Jdu do toho'} <ArrowRight size={18} /></button>
             </div>
             {interestMessage && <small className={`interest-message ${interestState}`}>{interestMessage}</small>}
             <small id="interest-note">Zápisem souhlasíš se zasíláním zpráv o otevření a novinkách MYNUTY. Souhlas můžeš kdykoli odvolat. Podrobnosti najdeš níže v častých otázkách.</small>

@@ -15,12 +15,20 @@
 .public-nav .public-nav-cta { display: inline-flex; min-height: 38px; align-items: center; gap: 9px; padding: 0 13px; color: #fff; background: var(--public-green); border-radius: 4px; }
 .public-nav .public-nav-cta:hover { color: #fff; background: var(--public-deep); }
 .public-hero { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(260px, .88fr); column-gap: 48px; padding-top: 26px; }
-.hero-copy { align-self: start; }
+.hero-copy { align-self: center; }
 @media (min-width: 801px) { .hero-copy { padding-top: 50px; } }
 .hero-eyebrow, .section-label { display: inline-flex; align-items: center; gap: 8px; color: #849087; font-size: 10px; font-weight: 700; letter-spacing: .7px; }
 .hero-eyebrow > span { width: 7px; height: 7px; background: var(--public-orange); border-radius: 50%; }
 .hero-copy h1 { max-width: 620px; margin: 18px 0 15px; font-family: Manrope, sans-serif; font-size: clamp(37px, 4.2vw, 55px); font-weight: 750; line-height: 1.1; }
+.hero-title-line { display: block; }
+.hero-title-order { white-space: nowrap; }
+.hero-title-location { display: inline-block; color: var(--public-green); animation: hero-location-enter .28s ease-out both; }
 .hero-copy > p { max-width: 560px; margin: 0; color: #69766e; font-size: 15px; line-height: 1.7; }
+.hero-launch { display: inline-flex; align-items: center; gap: 12px; margin-top: 8px; padding: 10px 17px 10px 11px; background: #fff; border: 1px solid #e7ece5; border-left: 3px solid var(--public-orange); border-radius: 5px; box-shadow: 0 5px 18px rgba(29, 51, 38, .045); }
+.hero-launch-icon { display: grid; width: 38px; height: 38px; flex: 0 0 auto; place-items: center; color: var(--public-green); background: #edf7ec; border-radius: 50%; }
+.hero-launch > span:last-child { display: grid; gap: 2px; }
+.hero-launch small { color: #849087; font-size: 9px; font-weight: 700; letter-spacing: .65px; }
+.hero-launch strong { color: #344b39; font-family: Manrope, sans-serif; font-size: 17px; font-weight: 800; line-height: 1.2; }
 .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 19px; margin-top: 24px; }
 .button-primary { display: inline-flex; min-height: 46px; align-items: center; justify-content: center; gap: 10px; padding: 0 16px; color: #fff; background: var(--public-green); border: 0; border-radius: 4px; font-size: 12px; font-weight: 700; transition: background .16s, transform .16s; }
 .button-primary:hover { background: var(--public-deep); transform: translateY(-1px); }
@@ -32,12 +40,12 @@
 .bag-asset { display: block; width: 100%; height: 100%; object-fit: contain; transform: scale(1.25) translate(-16px, -10px); }
 .bag-asset svg { display: block; width: 100%; height: 100%; }
 .ticket-name-layer { position: absolute; z-index: 1; inset: 0; pointer-events: none; transform: scale(1.25) translate(-16px, -10px); }
-.public-site .ticket-name-input { position: absolute; top: 68.9%; left: 62.5%; width: 20%; height: 2.8%; padding: 0 2px; color: #14532d; background: #fff; border: 0; border-radius: 1px; font: 800 8px/1 Manrope, sans-serif; text-align: center; transform: rotate(-7deg); pointer-events: auto; cursor: text; }
+.public-site .ticket-name-input { position: absolute; top: 68.9%; left: 62.5%; width: 20%; height: 2.8%; padding: 0 2px; color: #14532d; background: #fff; border: 0; border-radius: 1px; font: 800 10px/1 Manrope, sans-serif; text-align: center; transform: rotate(-7deg); pointer-events: auto; cursor: text; }
 .public-site .ticket-name-input:focus-visible { outline: 2px solid rgba(17, 158, 85, .45); outline-offset: -2px; }
 .public-site .ticket-name-input::placeholder { color: #237040; opacity: 0; }
 .public-site .ticket-name-input.is-ready::placeholder { opacity: 1; animation: ticket-cursor-blink .48s steps(1, end) 3 forwards; }
 .ticket-time-control { position: absolute; z-index: 2; inset: 0; pointer-events: none; transform: scale(1.25) translate(-16px, -10px); }
-.public-site .ticket-time-button { position: absolute; top: 72.9%; left: 72%; width: 8.8%; height: 3.1%; padding: 0; color: #fff; background: #ff9e1b; border: 0; border-radius: 99px; font: 800 6px/1 Manrope, sans-serif; text-align: center; transform: rotate(-7deg); pointer-events: auto; cursor: pointer; }
+.public-site .ticket-time-button { position: absolute; top: 72.9%; left: 72%; width: 8.8%; height: 3.1%; padding: 0; color: #fff; background: #ff9e1b; border: 0; border-radius: 99px; font: 800 8px/1 Manrope, sans-serif; text-align: center; transform: rotate(-7deg); pointer-events: auto; cursor: pointer; }
 .public-site .ticket-time-button:focus-visible { outline: 2px solid #14532d; outline-offset: 2px; }
 .ticket-time-menu { position: absolute; right: 7%; bottom: 23%; width: min(26%, 96px); max-height: 78px; overflow: hidden; padding: 3px 4px; color: #34443a; background: #fff; border: 1px solid #dfe8dc; border-radius: 5px; box-shadow: 0 8px 24px rgba(30, 59, 37, .22); transform-origin: right bottom; animation: ticket-time-open .2s ease-out both; pointer-events: auto; }
 .ticket-time-options { display: grid; max-height: 38px; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; user-select: none; scrollbar-color: #559c67 #eaf0e8; scrollbar-width: thin; }
@@ -50,6 +58,7 @@
 .public-site .ticket-time-custom input { width: 49px; min-width: 0; height: 19px; padding: 0 1px; color: #34443a; background: #f7faf6; border: 1px solid #dfe8dc; border-radius: 3px; font: 9px/1 Manrope, sans-serif; }
 @keyframes ticket-time-open { from { opacity: 0; transform: translate(7px, -5px) rotate(-4deg) scale(.94); } to { opacity: 1; transform: translate(0) rotate(-7deg) scale(1); } }
 @keyframes ticket-cursor-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+@keyframes hero-location-enter { from { opacity: .35; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 .visual-note { color: #899489; font-family: Manrope, sans-serif; font-size: 11px; font-weight: 700; text-align: center; }
 .hero-flow { display: grid; width: min(100%, 960px); grid-column: 1 / -1; grid-template-columns: 1fr 44px 1fr 44px 1fr; align-items: center; justify-self: center; gap: 14px; margin: 24px 0 28px; padding: 19px 12px; background: #fff; border: 1px solid #e9ede7; border-radius: 6px; box-shadow: 0 7px 25px rgba(30,59,37,.035); }
 .flow-step { display: flex; align-items: center; justify-content: center; gap: 12px; }
@@ -120,6 +129,7 @@
 .public-site .place-map { right: 15px; }
 @media (max-width: 560px) {
   .public-hero { position: relative; }
+  .hero-copy h1 .hero-title-order { font-size: clamp(25px, 8.3vw, 37px); }
   .hero-copy { position: relative; z-index: 1; }
   .public-header-inner { width: calc(100% - 40px); }
   .public-brand img { width: 120px; }
@@ -289,7 +299,7 @@
 .interest-benefits li > span { display: grid; width: 21px; height: 21px; flex: 0 0 auto; place-items: center; margin-top: 1px; color: #fff; background: var(--public-green); border-radius: 50%; }
 .interest-demo label { font-size: 12px; }
 .interest-demo input { height: 46px; font-size: 15px; }
-.interest-demo .button-primary { min-height: 46px; font-size: 14px; }
+.interest-demo .button-primary { width: 100%; min-height: 50px; justify-content: center; font-size: 15px; box-shadow: 0 5px 12px rgba(10,126,67,.18); }
 .interest-message { font-size: 13px; }
 .interest-demo > small { color: #6b776e; font-size: 12px; }
 .interest-demo > small a, .faq-list details > p a, .public-footer > div > span a { color: #237040; text-decoration: underline; text-underline-offset: 2px; }
@@ -384,4 +394,28 @@
   .goods-fact > svg { width: 21px; height: 21px; }
   .goods-fact strong { font-size: 14px; }
   .goods-fact span { font-size: 10px; }
+}
+
+@media (min-width: 801px) {
+  .hero-copy { padding-top: 0; }
+}
+
+@media (max-width: 800px) {
+  .public-hero { grid-template-columns: minmax(0, 1fr) minmax(220px, .72fr); align-items: center; column-gap: 16px; padding-top: 20px; }
+  .hero-copy { padding-top: 0; }
+  .hero-copy h1 { font-size: clamp(28px, 5vw, 42px); }
+  .hero-title-order { white-space: normal; }
+  .hero-visual { min-height: 0; }
+  .hero-bag-art { width: min(100%, 270px); height: auto; transform: none; }
+}
+
+@media (max-width: 560px) {
+  .public-hero { display: block; padding-top: 25px; }
+  .hero-copy { align-self: auto; }
+  .hero-visual { display: flex; margin-top: 5px; }
+  .hero-bag-art { width: min(72vw, 290px); margin-inline: auto; }
+  .hero-launch { margin-top: 10px; }
+  .hero-launch strong { font-size: 16px; }
+  .public-site .ticket-name-input { font-size: 9px; }
+  .public-site .ticket-time-button { font-size: 7px; }
 }
