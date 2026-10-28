@@ -1,0 +1,14 @@
+mynuta – papírová taška do úvodu webu
+
+svg/  vektor s průhledným pozadím (doporučeno pro web), plátno 480 × 480
+png/  záloha 1440 × 1440 px s průhledným pozadím
+
+pekarna  bageta, celer, mléko, salát, jablko, chleba, pomeranč
+snidane  mléko, rohlíky v sáčku, marmeláda, džus, pomeranč, jablko
+trh      pórek, mrkev, salát, paprika, rajčata, okurka
+
+Krémové kolečko za taškou (#FBEFD2) není součástí obrázku – je to prvek webu.
+Při velikosti obrázku 360 × 360 px: kolečko 202 px, posun 90 px zleva a 45 px shora.
+(obecně: průměr 56 % šířky obrázku, posun 25 % zleva a 12,5 % shora)
+
+Text na lístečku (Nováková · výdej 17:00) je převedený na křivky, takže vypadá všude stejně.

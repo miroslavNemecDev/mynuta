@@ -1,0 +1,109 @@
+/* Sestav si tašku – mynuta.cz
+   Všechno je pod třídou .sst, takže to nepřepíše styly zbytku webu.
+   Barvy a písma jsou jako proměnné na .sst – dají se přepsat z webu. */
+
+.sst {
+  --sst-bg: #F6F7F4;
+  --sst-surface: #FFFFFF;
+  --sst-chip: #EEF2EB;
+  --sst-ink: #1E2B24;
+  --sst-muted: #5B6660;
+  --sst-green: #1F7A3A;
+  --sst-green-ink: #FFFFFF;
+  --sst-accent: #FF9E1B;
+  --sst-halo: #FBEFD2;
+  --sst-meter: #E8ECE5;
+  --sst-font-ui: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --sst-font-display: 'Fredoka', 'Manrope', system-ui, sans-serif;
+  --sst-radius: 16px;
+  --sst-sticky-top: 16px;           /* posun lepivého košíku pod hlavičkou webu */
+  container-type: inline-size;
+  background: var(--sst-bg);
+  color: var(--sst-ink);
+  font-family: var(--sst-font-ui);
+  font-size: 15px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .sst {
+    --sst-bg: #0F1611; --sst-surface: #18221B; --sst-chip: #1F2B23; --sst-ink: #E8EFE9; --sst-muted: #9DAAA1;
+    --sst-green: #3FA85A; --sst-green-ink: #0F1611; --sst-accent: #FFA41F; --sst-halo: #22352A; --sst-meter: #26332A;
+  }
+}
+:root[data-theme="dark"] .sst {
+  --sst-bg: #0F1611; --sst-surface: #18221B; --sst-chip: #1F2B23; --sst-ink: #E8EFE9; --sst-muted: #9DAAA1;
+  --sst-green: #3FA85A; --sst-green-ink: #0F1611; --sst-accent: #FFA41F; --sst-halo: #22352A; --sst-meter: #26332A;
+}
+
+.sst *, .sst *::before, .sst *::after { box-sizing: border-box; }
+.sst-inner { display: flex; flex-direction: column; gap: 24px; }
+
+/* úvod */
+.sst-intro { display: flex; flex-direction: column; gap: 8px; max-width: 62ch; }
+.sst-eyebrow { font-size: 11.5px; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; color: var(--sst-muted); display: flex; align-items: center; gap: 8px; }
+.sst-eyebrow::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--sst-accent); }
+.sst-title { margin: 0; font-size: clamp(28px, 4vw, 40px); line-height: 1.1; font-weight: 800; text-wrap: balance; }
+.sst-lead { margin: 0; color: var(--sst-muted); line-height: 1.55; }
+
+/* rozložení: regál vlevo, lepivý košík vpravo */
+.sst-layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 24px; align-items: start; }
+.sst-basket { position: sticky; top: var(--sst-sticky-top); background: var(--sst-surface); border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+
+/* scéna s taškami */
+.sst-stage { display: flex; justify-content: center; align-items: flex-end; min-height: 300px; }
+.sst-bag { flex: 1 1 0; min-width: 0; max-width: 330px; }
+.sst-bag svg { display: block; width: 100%; height: auto; overflow: visible; }
+.sst-item { transform-box: view-box; transform-origin: 0 0; transition: transform .46s cubic-bezier(.34,1.42,.62,1), opacity .3s ease; }
+.sst-body { transform-box: view-box; transform-origin: 240px 412px; }
+.sst-tagtext { font-family: var(--sst-font-ui); }
+.sst-flyer { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 1000; overflow: visible; }
+
+/* souhrn */
+.sst-summary { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.sst-count { font-family: var(--sst-font-display); font-weight: 700; font-size: 34px; line-height: 1; }
+.sst-count small { font-size: 20px; font-weight: 600; margin-left: 4px; }
+.sst-facts { color: var(--sst-muted); font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; }
+.sst-meter { display: flex; flex-direction: column; gap: 6px; }
+.sst-meter-label { font-size: 13px; font-weight: 700; color: var(--sst-muted); display: flex; justify-content: space-between; gap: 8px; font-variant-numeric: tabular-nums; }
+.sst-bar { height: 8px; border-radius: 99px; background: var(--sst-meter); overflow: hidden; }
+.sst-bar > span { display: block; height: 100%; width: 0; border-radius: 99px; background: var(--sst-accent); transition: width .5s cubic-bezier(.3,1.2,.5,1); }
+.sst-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.sst-btn { font: 700 14px/1 var(--sst-font-ui); border: 0; border-radius: 999px; padding: 11px 16px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.sst-btn:focus-visible, .sst-step:focus-visible { outline: 3px solid var(--sst-accent); outline-offset: 2px; }
+.sst-btn-main { background: var(--sst-green); color: var(--sst-green-ink); }
+.sst-btn-ghost { background: var(--sst-chip); color: var(--sst-ink); }
+.sst-btn svg { width: 18px; height: 18px; }
+.sst-note { font-size: 12.5px; color: var(--sst-muted); line-height: 1.45; margin: 0; }
+
+/* regál se zbožím */
+.sst-shelf { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.sst-cat-title { font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sst-muted); margin: 0 0 10px; }
+.sst-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 12px; }
+.sst-card { background: var(--sst-surface); border-radius: var(--sst-radius); padding: 12px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.sst-pic { background: var(--sst-chip); border-radius: 12px; height: 128px; display: flex; align-items: center; justify-content: center; }
+.sst-pic svg { height: 108px; width: 100%; max-width: 100%; overflow: visible; }
+.sst-name { margin: 0; font-size: 15px; font-weight: 800; line-height: 1.25; }
+.sst-unit { margin: 2px 0 0; font-size: 13px; color: var(--sst-muted); font-weight: 600; }
+.sst-ctl { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; }
+.sst-price { font-weight: 800; font-size: 15px; font-variant-numeric: tabular-nums; }
+.sst-add { background: var(--sst-green); color: var(--sst-green-ink); padding: 9px 14px 9px 10px; }
+.sst-stepper { display: inline-flex; align-items: center; gap: 4px; }
+.sst [hidden] { display: none !important; }
+.sst-step { width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--sst-chip); color: var(--sst-ink); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
+.sst-step svg { width: 22px; height: 22px; }
+.sst-qty { min-width: 22px; text-align: center; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+/* úzká šířka (podle šířky komponenty, ne okna) */
+@container (max-width: 900px) {
+  .sst-layout { grid-template-columns: minmax(0, 1fr); }
+  .sst-basket { order: -1; z-index: 5; border-radius: 0 0 20px 20px; padding: 10px 14px 14px; gap: 10px; box-shadow: 0 10px 24px -18px rgba(0, 0, 0, .35); }
+  .sst-stage { min-height: 0; height: 168px; }
+  .sst-bag { max-width: 168px; }
+  .sst-count { font-size: 26px; }
+  .sst-note { display: none; }
+  .sst-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .sst-pic { height: 108px; }
+  .sst-pic svg { height: 92px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sst-item, .sst-bar > span { transition: none; }
+}
