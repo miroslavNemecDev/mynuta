@@ -230,10 +230,15 @@
   .interest-demo .button-primary { width: 100%; min-height: 48px; }
   .privacy-disclosure summary { min-height: 48px; font-size: 12px; }
   .privacy-disclosure p { font-size: 12px; }
-  .public-footer .wrap { display: flex; flex-direction: column; align-items: center; gap: 0; text-align: center; }
-  .public-footer .footer-info { display: flex; flex-direction: column; align-items: center; }
+  /* Patička: nahoře logo a návrat nahoru, pod tím adresa s otevřením vlevo a e-mail vpravo */
+  .public-footer { padding-block: 12px 14px; }
+  .public-footer .wrap { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px 16px; }
+  .public-footer .footer-info { display: contents; }
   .public-footer .footer-sep { display: none; }
-  .public-footer .public-brand, .public-footer .footer-info > span:not(.footer-sep), .public-footer .footer-info > a, .public-footer .wrap > a:last-child { display: flex; min-height: 44px; align-items: center; justify-content: center; }
+  .public-footer .footer-info > span:not(.footer-sep) { grid-column: 1; line-height: 1.45; }
+  .public-footer .public-brand { grid-column: 1; grid-row: 1; min-height: 44px; align-items: flex-start; justify-content: center; }
+  .public-footer .wrap > a:last-child { display: flex; grid-column: 2; grid-row: 1; min-height: 44px; align-items: center; justify-self: end; }
+  .public-footer .footer-info > a { display: flex; grid-column: 2; grid-row: 2 / span 2; min-height: 44px; align-items: center; justify-self: end; }
 }
 
 /* Krok 1 rozdělený na A (nahoře) a B (dole) */

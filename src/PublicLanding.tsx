@@ -48,7 +48,25 @@ function Brand() {
   )
 }
 
-const orderPlaces = ['z práce', 'z tramvaje', 'ze školky', 'ze školy', 'z tréninku', 'z procházky'].map(t)
+const orderPlaceNames = [
+  'z práce', 'z tramvaje', 'ze školky', 'ze školy', 'z tréninku',
+  'z procházky', 'z autobusu', 'z trolejbusu', 'z nádraží', 'z fitka',
+  'z kroužku', 'z hřiště', 'od doktora', 'z výletu', 'z návštěvy',
+  'z bazénu', 'od babičky', 'z parku', 'od kadeřníka', 'z kina',
+]
+const isSchoolPlace = (place: string) => place.startsWith('ze škol')
+
+// Náhodné pořadí míst. Škola a školka nikdy po sobě, ani při návratu na začátek seznamu.
+function shuffledOrderPlaces() {
+  const places = [...orderPlaceNames]
+  do {
+    for (let i = places.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [places[i], places[j]] = [places[j], places[i]]
+    }
+  } while (places.some((place, i) => isSchoolPlace(place) && isSchoolPlace(places[(i + 1) % places.length])))
+  return places.map(t)
+}
 
 const steps = [
   { title: 'Objednáš.', text: 'Vybereš si z přibližně 500 druhů zboží a zvolíš čas vyzvednutí.' },
@@ -79,13 +97,14 @@ function readSourceParam() {
 }
 
 function PublicLanding() {
+  const [orderPlaces] = useState(shuffledOrderPlaces)
   const [orderPlace, setOrderPlace] = useState(0)
 
   // Rotace začíná až po úvodní animaci, aby první místo bylo vidět celou dobu
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     let interval: number | undefined
-    const tick = () => setOrderPlace((place) => (place + 1) % orderPlaces.length)
+    const tick = () => setOrderPlace((place) => (place + 1) % orderPlaceNames.length)
     const start = window.setTimeout(() => {
       tick()
       interval = window.setInterval(tick, 2400)
