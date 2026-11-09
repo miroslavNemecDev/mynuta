@@ -1,5 +1,6 @@
 const SVG_NS = 'http://www.w3.org/2000/svg'
-const PHONE_TAP_DELAY = 500
+export const PHONE_TAP_DELAY_MS = 500
+const PHONE_TAP_DELAY = PHONE_TAP_DELAY_MS
 const PHONE_TAP_OFFSET = 1400
 const PHONE_LOOP_DURATION = 5000
 const ITEM_STAGGER = 38

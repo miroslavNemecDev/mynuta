@@ -1,298 +1,103 @@
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react'
 import {
+  ArrowDown,
   ArrowRight,
   CalendarDays,
   Check,
   Clock,
   ChevronDown,
   MapPin,
-  Minus,
-  Plus,
   ShoppingBasket,
 } from 'lucide-react'
 import './PublicLanding.css'
-import { playBagIntro, type BagIntro } from './heroBagIntro'
 
-import kartaIcon from './assets/icons/svg-svetle/karta.svg'
-import qrIcon from './assets/icons/svg-svetle/qr.svg'
-import mobilIcon from './assets/icons/svg-svetle/mobil.svg'
-import pecivoIcon from './assets/icons/svg-svetle/pecivo.svg'
-import mlekoIcon from './assets/icons/svg-svetle/mleko.svg'
-import vejceIcon from './assets/icons/svg-svetle/vejce.svg'
-import ovoceIcon from './assets/icons/svg-svetle/ovoce.svg'
-import zeleninaIcon from './assets/icons/svg-svetle/zelenina.svg'
-import masoIcon from './assets/icons/svg-svetle/maso.svg'
-import napojeIcon from './assets/icons/svg-svetle/napoje.svg'
-import bagPekarna from './assets/bags/mynuta-taska-papirova/svg/taska-papirova-pekarna.svg'
-import bagSnidane from './assets/bags/mynuta-taska-papirova/svg/taska-papirova-snidane.svg'
 import bagTrh from './assets/bags/mynuta-taska-papirova/svg/taska-papirova-trh.svg'
-
-type DemoItem = { name: string; icon: string }
-type PickupDay = { id: string; date: Date; label: string }
-type DemoStage = 'items' | 'time' | 'pay' | 'confirmation' | 'pickup' | 'done'
-type Faq = { id?: string; question: string; answer: ReactNode }
-
-const bagLoaders = import.meta.glob<string>('./assets/bags/mynuta-taska-papirova/svg/taska-papirova-*.svg', { query: '?raw', import: 'default' })
-const bagLoaderKeys = Object.keys(bagLoaders).sort()
 
 function publicAsset(filename: string) {
   return `${import.meta.env.BASE_URL}${filename}`
 }
 
-const demoItems: DemoItem[] = [
-  { name: 'Rohlíky', icon: pecivoIcon },
-  { name: 'Chléb', icon: pecivoIcon },
-  { name: 'Mléko', icon: mlekoIcon },
-  { name: 'Máslo', icon: mlekoIcon },
-  { name: 'Vejce', icon: vejceIcon },
-  { name: 'Šunka', icon: masoIcon },
-  { name: 'Eidam', icon: masoIcon },
-  { name: 'Banány', icon: ovoceIcon },
-  { name: 'Jablka', icon: ovoceIcon },
-  { name: 'Rajčata', icon: zeleninaIcon },
-  { name: 'Minerálka', icon: napojeIcon },
-  { name: 'Káva', icon: napojeIcon },
-]
-
-const commonCzechSurnames = [
-  'Novák', 'Svoboda', 'Novotný', 'Dvořák', 'Černý',
-  'Procházka', 'Kučera', 'Veselý', 'Horák', 'Němec',
-  'Marek', 'Pospíšil', 'Pokorný', 'Hájek', 'Jelínek',
-  'Král', 'Růžička', 'Beneš', 'Fiala', 'Sedláček',
-]
-
-const ticketTimeOptions = Array.from({ length: 13 }, (_, index) => `${String(index + 8).padStart(2, '0')}:00`)
-const orderLocations = ['doma', 'v tramvaji', 'v práci']
-
-function pickRandomTime(current: string) {
-  const candidates = ticketTimeOptions.filter((time) => time !== current)
-  return candidates[Math.floor(Math.random() * candidates.length)]
+// Česká typografie: nezlomitelná mezera za jednopísmenými předložkami a spojkami i v „leden 2027“,
+// nezlomitelný spojovník v „e-mail“ a „e-shop“.
+function t(text: string) {
+  return text
+    .replace(/(?<=^|[\s(„])([kKsSvVzZoOuUaAiI]) /g, '$1\u00a0')
+    .replace(/leden 2027/gi, (match) => match.replace(' ', '\u00a0'))
+    .replace(/\be-(mail|shop)/gi, 'e\u2011$1')
 }
 
 const contactEmail = 'info@mynuta.cz'
 const contactLink = <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
-
-const faqs: Faq[] = [
-  { question: 'Za jak dlouho bude nákup připravený?', answer: 'Skladové věci připravíme do 30 minut, ostatní nejdřív další otevírací den. O připravení ti pošleme e-mail.' },
-  { question: 'Je stanovená minimální objednávka?', answer: 'Zatím ne. Podmínky objednávek i ceník zveřejníme před otevřením.' },
-  { question: 'Do kdy můžu objednat a co když nestihnu vyzvednutí?', answer: 'Objednat můžeš nejpozději 30 minut před zavřením. Pokud nestihneš vybraný čas, nákup na tebe počká do konce otevírací doby a chlazené věci zůstanou v lednici. Když výdej nestihneš vůbec, ozvi se nám. Možnost zrušení objednávky a vrácení peněz posoudíme individuálně.' },
-  { question: 'Jak bude zajištěné chlazené zboží?', answer: 'Chlazené a mražené věci čekají až do výdeje v lednici a mrazáku. Teplotu v nich hlídají čidla.' },
-  { question: 'Co když s nákupem nebude něco v pořádku?', answer: <>Tašku si můžeš zkontrolovat hned u výdeje. Když na něco přijdeš až doma, napiš na {contactLink}. Chybějící věci ti vrátíme na kartu, vadné vyměníme, nebo vrátíme peníze.</> },
-  { id: 'faq-email', question: 'Co uděláte s mým e-mailem?', answer: <>Použijeme ho jen ke zprávám o otevření a novinkám MYNUTY a nikomu ho nedáme. Odhlásit se můžeš kdykoli, stačí napsat na {contactLink}. Kdyby MYNUTA neotevřela, seznam smažeme. Správcem údajů je Miroslav Němec. Máš právo na přístup k údajům, jejich opravu i výmaz a můžeš podat stížnost u Úřadu pro ochranu osobních údajů.</> },
-]
-
-function getPickupDays(): PickupDay[] {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const days: PickupDay[] = []
-
-  for (let offset = 0; offset <= 7; offset += 1) {
-    const date = new Date(today)
-    date.setDate(date.getDate() + offset)
-    const key = date.toISOString().slice(0, 10)
-    if (date.getDay() === 0 || makePickupTimes(date).length === 0) continue
-
-    const label = offset === 0
-      ? 'Dnes'
-      : offset === 1
-        ? 'Zítra'
-        : new Intl.DateTimeFormat('cs-CZ', { weekday: 'long' }).format(date)
-    days.push({ id: key, date, label })
-  }
-
-  return days
-}
-
-function makePickupTimes(date: Date) {
-  const startHour = date.getDay() === 6 ? 9 : 8
-  const endHour = date.getDay() === 6 ? 12 : 20
-  const times: string[] = []
-  for (let minutes = startHour * 60; minutes <= endHour * 60; minutes += 30) {
-    const hour = String(Math.floor(minutes / 60)).padStart(2, '0')
-    const minute = String(minutes % 60).padStart(2, '0')
-    times.push(`${hour}:${minute}`)
-  }
-  if (date.toDateString() === new Date().toDateString()) {
-    const now = new Date()
-    return times.filter((time) => {
-      const [hour, minute] = time.split(':').map(Number)
-      return hour * 60 + minute > now.getHours() * 60 + now.getMinutes()
-    })
-  }
-  return times
-}
-
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'long' }).format(date)
-}
-
-function formatPickupSummary(day: PickupDay, time: string) {
-  const date = new Intl.DateTimeFormat('cs-CZ', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  }).format(day.date)
-  return `${date} v ${time}`
-}
+// Správce osobních údajů pro text o zpracování e-mailů
+const controllerName = 'Miroslav Němec'
 
 function Brand() {
   return (
-    <a className="public-brand" href="#nahoru" aria-label="MYNUTA, nahoru">
+    <a className="public-brand" href="#nahoru" aria-label="Mynuta, nahoru">
       <img src={publicAsset('mynuta-logo.svg')} alt="MYNUTA" />
       <span className="public-brand-tagline">rychle – do mynuty</span>
     </a>
   )
 }
 
+const orderPlaces = ['z práce', 'z tramvaje', 'ze školky', 'ze školy', 'z tréninku', 'z procházky'].map(t)
+
+const steps = [
+  { title: 'Objednáš.', text: 'Vybereš si z přibližně 500 druhů zboží a zvolíš čas vyzvednutí.' },
+  { title: 'Připravím ti to.', text: 'Na tvůj čas bude nákup zabalený a se jménem na tašce.' },
+  { title: 'Zkontroluješ.', text: 'U pultu si ho projdeš. Co nesedí, hned opravím.' },
+  { title: 'Odcházíš do minuty.', text: 'Zaplatíš předem online, nebo na místě hotově či kartou.' },
+]
+
+const promises = [
+  { word: 'Hledání', title: 'Co objednáš, to tam je.', text: 'Nic nehledáš, celý nákup ti dám do tašky já. Kdyby něco došlo, napíšu ti hned, ne až u pultu.' },
+  { word: 'Nervy', title: 'Žádné uličky ani vozíky.', text: 'Žádná tlačenice. Jen pult a tašky s tvým jménem.' },
+  { word: 'Fronty', title: 'U pultu jsi minutu.', text: 'Tašky čekají připravené. Zkontroluješ je a jdeš.' },
+]
+
+const facts = [
+  { Icon: ShoppingBasket, title: 'Přibližně 500', text: 'druhů zboží' },
+  { Icon: Clock, title: 'Výdej do minuty', text: 'nákup čeká zabalený' },
+  { Icon: CalendarDays, title: 'Po–Pá 8–20, So 9–12', text: 'V neděli zavřeno' },
+  { Icon: MapPin, title: 'Plzeň-Slovany', text: 'adresu pošlu registrovaným' },
+]
+
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+
+// Zdroj registrace z parametru ?z= v adrese, např. ?z=letak
+function readSourceParam() {
+  const value = new URLSearchParams(window.location.search).get('z')?.trim().toLowerCase()
+  return value && /^[a-z0-9_-]{1,40}$/.test(value) ? value : null
+}
+
 function PublicLanding() {
-  const [orderLocationIndex, setOrderLocationIndex] = useState(0)
-  const [stage, setStage] = useState<DemoStage>('items')
-  const [quantities, setQuantities] = useState<number[]>(demoItems.map(() => 0))
-  const [pickupChoice, setPickupChoice] = useState<'first' | 'second' | 'custom'>('first')
-  const [customDayId, setCustomDayId] = useState('')
-  const [pickupTime, setPickupTime] = useState('')
-  const [orderCode, setOrderCode] = useState('')
-  const [startedAt, setStartedAt] = useState<number | null>(null)
-  const [elapsed, setElapsed] = useState(0)
+  const [orderPlace, setOrderPlace] = useState(0)
+
+  // Rotace začíná až po úvodní animaci, aby první místo bylo vidět celou dobu
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    let interval: number | undefined
+    const tick = () => setOrderPlace((place) => (place + 1) % orderPlaces.length)
+    const start = window.setTimeout(() => {
+      tick()
+      interval = window.setInterval(tick, 2400)
+    }, 4000)
+    return () => {
+      window.clearTimeout(start)
+      window.clearInterval(interval)
+    }
+  }, [])
   const [interestEmail, setInterestEmail] = useState('')
   const [interestState, setInterestState] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
   const [interestMessage, setInterestMessage] = useState('')
-  const [activeBagIndex] = useState<number>(() => Math.floor(Math.random() * 3))
-  const [ticketName, setTicketName] = useState<string | null>(null)
-  const [demoTicketName, setDemoTicketName] = useState('')
-  const [surnameIndex, setSurnameIndex] = useState(0)
-  const [ticketPickupTime, setTicketPickupTime] = useState(() => pickRandomTime(''))
-  const [ticketTimeMenuOpen, setTicketTimeMenuOpen] = useState(false)
-  const timeListDrag = useRef({ active: false, moved: false, startY: 0, startScroll: 0 })
-  const ticketTimeTouched = useRef(false)
-  const bagMountRef = useRef<HTMLDivElement>(null)
-  const [bagFailed, setBagFailed] = useState(false)
-  const [bagTapDelay, setBagTapDelay] = useState<number | null>(null)
-  const [introDone, setIntroDone] = useState(false)
-  const [ticketTimeShown, setTicketTimeShown] = useState(false)
-
-  const bagVariants = [bagPekarna, bagSnidane, bagTrh]
-
-  const pickupDays = getPickupDays()
-  const quickPickupDays = pickupDays.slice(0, 2)
-  const customPickupDays = pickupDays.slice(quickPickupDays.length)
-  const activeDay = pickupChoice === 'custom'
-    ? customPickupDays.find((day) => day.id === customDayId) ?? customPickupDays[0]
-    : pickupChoice === 'second'
-      ? quickPickupDays[1] ?? quickPickupDays[0]
-      : quickPickupDays[0]
-  const pickupTimes = activeDay ? makePickupTimes(activeDay.date) : []
-  const activeTime = pickupTimes.includes(pickupTime) ? pickupTime : pickupTimes[0] ?? ''
-  const itemCount = quantities.reduce((sum, quantity) => sum + quantity, 0)
-  const code = orderCode || '----'
-  const timerSeconds = Math.min(60, Math.floor((elapsed / 8000) * 60))
-  const timerLabel = `${Math.floor(timerSeconds / 60)}:${String(timerSeconds % 60).padStart(2, '0')}`
-
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const timer = window.setInterval(() => {
-      setOrderLocationIndex((current) => (current + 1) % orderLocations.length)
-    }, 2400)
-    return () => window.clearInterval(timer)
-  }, [])
-
-  useEffect(() => {
-    if (stage !== 'pickup' || startedAt === null) return
-    const timer = window.setInterval(() => {
-      const nextElapsed = Date.now() - startedAt
-      setElapsed(nextElapsed)
-      if (nextElapsed >= 8000) {
-        window.clearInterval(timer)
-        setElapsed(8000)
-        setStage('done')
-      }
-    }, 100)
-    return () => window.clearInterval(timer)
-  }, [stage, startedAt])
-
-  useEffect(() => {
-    const mount = bagMountRef.current
-    if (!mount) return
-    let cancelled = false
-    let intro: BagIntro | undefined
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-    bagLoaders[bagLoaderKeys[activeBagIndex]]()
-      .then((markup) => {
-        if (cancelled) return
-        mount.innerHTML = markup
-        setIntroDone(true)
-        setTicketTimeShown(true)
-        if (reduceMotion) {
-          return
-        }
-        intro = playBagIntro(
-          mount,
-          () => {
-            if (cancelled) return
-            setSurnameIndex((current) => (current + 1) % commonCzechSurnames.length)
-            if (!ticketTimeTouched.current) setTicketPickupTime(pickRandomTime)
-          },
-        )
-        setBagTapDelay(intro.tapDelayMs)
-      })
-      .catch(() => {
-        if (cancelled) return
-        setBagFailed(true)
-        setIntroDone(true)
-      })
-
-    return () => {
-      cancelled = true
-      intro?.stop()
-      mount.innerHTML = ''
-    }
-  }, [activeBagIndex])
-
-  useEffect(() => {
-    if (ticketName !== null || !introDone) return
-
-    const surname = commonCzechSurnames[surnameIndex]
-    let timer: number
-    let characterCount = 0
-
-    const typeNextCharacter = () => {
-      characterCount += 1
-      setDemoTicketName(surname.slice(0, characterCount))
-
-      if (characterCount < surname.length) {
-        timer = window.setTimeout(typeNextCharacter, 115)
-      }
-    }
-
-    timer = window.setTimeout(() => {
-      setDemoTicketName('')
-      if (surnameIndex > 0 && !ticketTimeTouched.current) setTicketPickupTime(pickRandomTime)
-      setTicketTimeShown(true)
-      typeNextCharacter()
-    }, surnameIndex === 0 ? 250 : 0)
-    return () => window.clearTimeout(timer)
-  }, [surnameIndex, ticketName, introDone])
-
-  const adjustQuantity = (index: number, change: number) => {
-    setQuantities((current) => current.map((quantity, itemIndex) => (
-      itemIndex === index ? Math.max(0, quantity + change) : quantity
-    )))
-  }
-
-  const beginAgain = () => {
-    setStage('items')
-    setQuantities(demoItems.map(() => 0))
-    setPickupChoice('first')
-    setCustomDayId('')
-    setPickupTime('')
-    setOrderCode('')
-    setStartedAt(null)
-    setElapsed(0)
-  }
+  const [cameFromHero, setCameFromHero] = useState(false)
+  const submitLock = useRef(false)
+  const [urlSource] = useState(readSourceParam)
+  const source = urlSource ?? (cameFromHero ? 'hero' : 'web')
 
   const handleInterestSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    if (submitLock.current || interestState === 'success') return
 
     const email = interestEmail.trim()
     if (!email) {
@@ -300,39 +105,47 @@ function PublicLanding() {
       setInterestMessage('Zadej prosím e-mail.')
       return
     }
+    if (!emailPattern.test(email)) {
+      setInterestState('error')
+      setInterestMessage('Tenhle e-mail vypadá neúplně. Zkontroluj ho prosím.')
+      return
+    }
 
+    submitLock.current = true
     setInterestState('submitting')
     setInterestMessage('')
 
-    try {
-      console.log('Submitting contact form', { email })
+    const controller = new AbortController()
+    const timeout = window.setTimeout(() => controller.abort(), 15000)
 
+    try {
       const response = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, zdroj: source }),
+        signal: controller.signal,
       })
 
       const data = await response.json().catch(() => ({}))
-      console.log('Subscribe response', { status: response.status, body: data })
 
       if (!response.ok) {
-        throw new Error(data?.error || 'Přihlášení se nepovedlo odeslat.')
+        throw new Error(data?.error || 'Registrace se nepovedla odeslat. Zkus to prosím znovu.')
       }
 
       setInterestState('success')
-      setInterestMessage('Děkujeme! Přihlášení jsme přijali. Brzy se ozveme.')
+      setInterestMessage('Díky! Zapsal jsem tě. Odkaz ti pošlu hned, jak bude e-shop připravený.')
       setInterestEmail('')
     } catch (error) {
       setInterestState('error')
-      setInterestMessage(error instanceof Error ? error.message : 'Něco se nepovedlo. Zkus to prosím znovu.')
+      setInterestMessage(
+        error instanceof Error && !(error instanceof TypeError) && error.name !== 'AbortError'
+          ? error.message
+          : 'Nepodařilo se spojit se serverem. Zkontroluj připojení a zkus to prosím znovu.',
+      )
+    } finally {
+      window.clearTimeout(timeout)
+      submitLock.current = false
     }
-  }
-
-  const startPickup = () => {
-    setElapsed(0)
-    setStartedAt(Date.now())
-    setStage('pickup')
   }
 
   return (
@@ -346,256 +159,120 @@ function PublicLanding() {
       <main>
         <section className="public-hero wrap" aria-labelledby="hero-title">
           <div className="hero-copy">
-            <span className="hero-eyebrow"><span /> NOVÁ VÝDEJNA V PLZNI-SLOVANECH</span>
-            <h1 id="hero-title" aria-label="Objednej doma, v tramvaji nebo v práci. Vyzvedni za minutu.">
-              <span className="hero-title-line hero-title-order" aria-hidden="true">Objednej <span key={orderLocationIndex} className="hero-title-location">{orderLocations[orderLocationIndex]}</span></span>
-              <span className="hero-title-line hero-title-order" aria-hidden="true">Vyzvedni za minutu.</span>
+            <span className="hero-eyebrow"><span /> VÝDEJNA POTRAVIN · PLZEŇ-SLOVANY</span>
+            <h1 id="hero-title">
+              <span className="sr-only">Bez hledání, nervů a front.</span>
+              <span className="hero-title-line hero-title-struck" aria-hidden="true">
+                <s style={{ '--i': 0 } as CSSProperties}>Hledání</s>
+                <s style={{ '--i': 1 } as CSSProperties}>Nervy</s>
+                <s style={{ '--i': 2 } as CSSProperties}>Fronty</s>
+              </span>
+              <span className="hero-title-line">Mynuta je <span className="hero-title-accent">jistota</span>.</span>
             </h1>
-            <div className="hero-launch">
-              <span className="hero-launch-icon"><CalendarDays size={20} aria-hidden="true" /></span>
-              <span><small>PLÁNOVANÉ OTEVŘENÍ</small><strong>Leden 2027</strong></span>
-            </div>
+            <p className="hero-subline">
+              <span>Objednáš online,</span>
+              <span>vyzvedneš cestou <span className="hero-title-location" key={orderPlace}>{orderPlaces[orderPlace]}</span>.</span>
+            </p>
+            <a className="hero-cta" href="#zajemci" onClick={() => setCameFromHero(true)}>Chci odkaz jako první <ArrowDown size={18} aria-hidden="true" /></a>
           </div>
           <div className="hero-visual">
-            <div className="hero-mark">
-              <div
-                className={`hero-bag-art${bagTapDelay !== null ? ' is-playing' : ''}`}
-                style={bagTapDelay !== null ? ({ '--bag-tap-delay': `${bagTapDelay}ms` } as React.CSSProperties) : undefined}
-              >
-                {bagFailed
-                  ? <img className="bag-asset" src={bagVariants[activeBagIndex]} alt="" aria-hidden="true" />
-                  : <div className="bag-asset" ref={bagMountRef} aria-hidden="true" />}
-                <div className="bag-phone-layer">
-                  <button
-                    type="button"
-                    className="bag-phone"
-                    aria-label="Vyzkoušet ukázkovou objednávku"
-                    title="Zobrazit objednávku"
-                    onClick={() => {
-                      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-                      const demo = document.querySelector<HTMLDetailsElement>('#demo .demo-disclosure')
-                      if (demo) demo.open = true
-                      document.getElementById('demo')?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
-                    }}
-                  >
-                    <svg className="bag-phone-cursor" viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 3.2V19l4.1-3.8 2.8 6.2 2.6-1.2-2.7-6 5.7-.2z" /></svg>
-                    <span className="bag-phone-notch" aria-hidden="true" />
-                    <span className="bag-phone-screen" aria-hidden="true">
-                      <span className="bag-phone-top"><i /><i /></span>
-                      <span className="bag-phone-row"><i /><i /></span>
-                      <span className="bag-phone-row"><i /><i /></span>
-                      <span className="bag-phone-row"><i /><i /></span>
-                      <b />
-                    </span>
-                  </button>
-                </div>
-                <div className="ticket-name-layer">
-                  <input
-                    id="ticket-name"
-                    className={`ticket-name-input${introDone ? ' is-ready' : ''}`}
-                    type="text"
-                    aria-label="Příjmení na lístku"
-                    title="Jméno na lístku"
-                    value={ticketName ?? demoTicketName}
-                    maxLength={18}
-                    placeholder="_"
-                    autoComplete="off"
-                    spellCheck={false}
-                    onFocus={(event) => {
-                      if (ticketName === null) {
-                        setTicketName(demoTicketName)
-                        event.currentTarget.select()
-                      }
-                    }}
-                    onChange={(event) => setTicketName(event.target.value)}
-                    onBlur={(event) => {
-                      if (!event.currentTarget.value.trim()) setTicketName(null)
-                    }}
-                  />
-                </div>
-                <div
-                  className="ticket-time-control"
-                  onBlur={(event) => {
-                    if (!event.currentTarget.contains(event.relatedTarget)) setTicketTimeMenuOpen(false)
-                  }}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Escape') setTicketTimeMenuOpen(false)
-                  }}
-                >
-                  <button
-                    type="button"
-                    className="ticket-time-button"
-                    aria-label="Změnit čas na lístku"
-                    aria-expanded={ticketTimeMenuOpen}
-                    aria-controls="ticket-time-menu"
-                    onClick={() => {
-                      ticketTimeTouched.current = true
-                      setTicketTimeShown(true)
-                      setTicketTimeMenuOpen((open) => !open)
-                    }}
-                  >
-                    {(ticketTimeShown || ticketName !== null) && <span key={ticketPickupTime} className="ticket-time-value">{ticketPickupTime}</span>}
-                  </button>
-                  {ticketTimeMenuOpen && <div className="ticket-time-menu" id="ticket-time-menu">
-                    <div
-                      className="ticket-time-options"
-                      role="group"
-                      aria-label="Nabízené časy"
-                      onPointerDown={(event) => {
-                        if (event.pointerType === 'touch') return
-                        timeListDrag.current = { active: true, moved: false, startY: event.clientY, startScroll: event.currentTarget.scrollTop }
-                      }}
-                      onPointerMove={(event) => {
-                        const drag = timeListDrag.current
-                        if (!drag.active) return
-                        const distance = event.clientY - drag.startY
-                        if (!drag.moved && Math.abs(distance) > 4) {
-                          drag.moved = true
-                          event.currentTarget.setPointerCapture(event.pointerId)
-                        }
-                        if (drag.moved) event.currentTarget.scrollTop = drag.startScroll - distance
-                      }}
-                      onPointerUp={(event) => {
-                        timeListDrag.current.active = false
-                        if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
-                      }}
-                      onPointerCancel={() => { timeListDrag.current.active = false }}
-                      onClickCapture={(event) => {
-                        if (!timeListDrag.current.moved) return
-                        timeListDrag.current.moved = false
-                        event.preventDefault()
-                        event.stopPropagation()
-                      }}
-                    >
-                      {ticketTimeOptions.map((time) => <button
-                        type="button"
-                        key={time}
-                        aria-pressed={ticketPickupTime === time}
-                        className={ticketPickupTime === time ? 'ticket-time-option selected' : 'ticket-time-option'}
-                        onClick={() => {
-                          setTicketPickupTime(time)
-                          setTicketTimeMenuOpen(false)
-                        }}
-                      >{time}</button>)}
-                    </div>
-                    <label className="ticket-time-custom"><span>Jiný:</span><input
-                      type="time"
-                      aria-label="Vlastní čas na lístku"
-                      value={ticketPickupTime}
-                      onChange={(event) => setTicketPickupTime(event.target.value)}
-                    /></label>
-                  </div>}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="hero-flow" role="list" aria-label="Tři kroky nákupu">
-            <div className="flow-step" role="listitem"><span className="flow-icon"><img src={mobilIcon} alt="" aria-hidden="true" className="flow-custom-icon" /></span><strong>Objednej</strong></div>
-            <ArrowRight className="flow-arrow" size={18} aria-hidden="true" />
-            <div className="flow-step" role="listitem"><span className="flow-icon"><img src={kartaIcon} alt="" aria-hidden="true" className="flow-custom-icon" /></span><strong>Zaplať</strong></div>
-            <ArrowRight className="flow-arrow" size={18} aria-hidden="true" />
-            <div className="flow-step" role="listitem"><span className="flow-icon"><img src={qrIcon} alt="" aria-hidden="true" className="flow-custom-icon" /></span><strong>Vyzvedni</strong></div>
+            <img className="hero-bag-art" src={bagTrh} alt="Papírová taška Mynuta s nákupem" />
           </div>
         </section>
 
-        <section className="demo-section wrap" id="demo">
-          <details className="demo-disclosure">
-            <summary className="demo-disclosure-summary"><span className="demo-summary-copy"><span className="section-label">INTERAKTIVNÍ UKÁZKA</span><strong>Prohlédnout objednávku krok za krokem</strong><small>Nic se neobjedná ani neplatí.</small></span><ChevronDown size={19} aria-hidden="true" /></summary>
-            <div className="demo-layout">
-            <div className="demo-explainer"><span className="demo-number">5 KROKŮ</span><h3>Od výběru k vyzvednutí.</h3><p>Proklikáš si nákup, jak bude fungovat v praxi.</p><button className="demo-reset" onClick={beginAgain}><span>↻</span> Začít znovu</button></div>
-            <div className="demo-phone" aria-label="Ukázka objednávky na mobilu">
-              <div className="phone-speaker" aria-hidden="true" />
-              <div className="phone-screen">
-                <div className="demo-topline"><img className="demo-mini-brand" src={publicAsset('mynuta-logo.svg')} alt="MYNUTA Potraviny" /><span className="demo-location"><MapPin size={12} /> Slovany</span></div>
-                <div className="demo-badge"><span /> Ukázka – zatím nelze objednat</div>
-                <div className="demo-progress" aria-label="Průběh ukázky">
-                  {['items', 'time', 'pay', 'confirmation', 'pickup'].map((step, index) => <span key={step} className={stage === 'done' || ['items', 'time', 'pay', 'confirmation', 'pickup'].indexOf(stage) >= index ? 'progress-active' : ''} />)}
-                </div>
-
-                {stage === 'items' && <div className="demo-content">
-                  <div className="demo-step-title"><span>KROK 1 Z 5</span><h3>Co si dáš do tašky?</h3><p>Vyber si pár věcí na ukázku.</p></div>
-                  <div className="demo-items">{demoItems.map(({ name, icon }, index) => <div className="demo-item" key={name}><span className="demo-item-icon"><img src={icon} alt="" aria-hidden="true" className="demo-item-custom-icon" /></span><span>{name}</span><div className="demo-quantity"><button aria-label={`Odebrat ${name}`} onClick={() => adjustQuantity(index, -1)} disabled={quantities[index] === 0}><Minus size={13} /></button><b>{quantities[index]}</b><button aria-label={`Přidat ${name}`} onClick={() => adjustQuantity(index, 1)}><Plus size={13} /></button></div></div>)}</div>
-                  <div className="demo-bottom"><span>V košíku <strong>{itemCount} {itemCount === 1 ? 'kus' : itemCount > 1 && itemCount < 5 ? 'kusy' : 'kusů'}</strong></span><button className="demo-next" onClick={() => setStage('time')} disabled={itemCount === 0}>Vybrat čas <ArrowRight size={16} /></button></div>
-                </div>}
-
-                {stage === 'time' && <div className="demo-content">
-                  <div className="demo-step-title"><span>KROK 2 Z 5</span><h3>Kdy se zastavíš?</h3><p>Vyber nejbližší termín nebo den až týden dopředu.</p></div>
-                  <div className="day-options" aria-label="Rychlý výběr dne">
-                    {quickPickupDays.map((day, index) => {
-                      const choice = index === 0 ? 'first' : 'second'
-                      return <button type="button" key={day.id} className={pickupChoice === choice ? 'day-selected' : ''} aria-pressed={pickupChoice === choice} onClick={() => setPickupChoice(choice)}><span>{day.label}</span><strong>{formatDate(day.date)}</strong></button>
-                    })}
-                    <button type="button" className={pickupChoice === 'custom' ? 'day-selected' : ''} aria-pressed={pickupChoice === 'custom'} onClick={() => setPickupChoice('custom')}><span>Jiný den</span><strong>Až týden</strong></button>
-                  </div>
-                  {pickupChoice === 'custom' && <div className="custom-day-picker"><label htmlFor="custom-pickup-day">Den vyzvednutí</label><div className="select-wrap"><select id="custom-pickup-day" value={activeDay?.id ?? ''} onChange={(event) => setCustomDayId(event.target.value)}>{customPickupDays.map((day) => <option key={day.id} value={day.id}>{day.label}, {formatDate(day.date)}</option>)}</select><ChevronDown size={16} /></div></div>}
-                  {activeDay && <div className="time-picker"><label htmlFor="pickup-time">Čas vyzvednutí</label><div className="select-wrap"><select id="pickup-time" value={activeTime} onChange={(event) => setPickupTime(event.target.value)}>{pickupTimes.map((time) => <option key={time} value={time}>{time}</option>)}</select><ChevronDown size={16} /></div><small>{activeDay.date.getDay() === 6 ? 'Sobota · 9:00–12:00' : 'Pondělí–pátek · 8:00–20:00'}</small></div>}
-                  <div className="demo-bottom"><button className="demo-back" onClick={() => setStage('items')}>Zpět</button><button className="demo-next" onClick={() => setStage('pay')} disabled={!activeTime}>Pokračovat <ArrowRight size={16} /></button></div>
-                </div>}
-
-                {stage === 'pay' && <div className="demo-content demo-centered">
-                  <div className="demo-step-title"><span>KROK 3 Z 5</span><h3>Všechno připravené.</h3><p>Tohle je jen ukázka. Nic se neodesílá a žádné peníze se nestrhnou.</p></div>
-                  <div className="payment-preview"><span className="payment-icon"><img src={kartaIcon} alt="" aria-hidden="true" className="payment-custom-icon" /></span><span><strong>Platba online</strong><small>Bez zadávání údajů v ukázce</small></span><Check size={17} /></div>
-                  <div className="demo-summary-line"><span>Položek v tašce</span><strong>{itemCount}</strong></div>
-                  <div className="demo-summary-line"><span>Vyzvednutí</span><strong>{activeDay ? formatPickupSummary(activeDay, activeTime) : activeTime}</strong></div>
-                  <div className="demo-bottom"><button className="demo-back" onClick={() => setStage('time')}>Zpět</button><button className="demo-next" onClick={() => { setOrderCode(String(Math.floor(1000 + Math.random() * 9000))); setStage('confirmation') }}>Zaplatit (ukázka) <ArrowRight size={16} /></button></div>
-                </div>}
-
-                {stage === 'confirmation' && <div className="demo-content demo-centered">
-                  <div className="demo-step-title"><span>KROK 4 Z 5</span><h3>Taška je připravená.</h3><p>Ukázková objednávka je hotová.</p></div>
-                  <div className="code-ticket"><span>TVŮJ UKÁZKOVÝ KÓD</span><strong>{code}</strong><img src={qrIcon} alt="" aria-hidden="true" className="code-ticket-icon" /></div>
-                  <div className="demo-summary-line"><span>V tašce</span><strong>{demoItems.filter((_, index) => quantities[index] > 0).map((item) => `${item.name} × ${quantities[demoItems.indexOf(item)]}`).join(', ')}</strong></div>
-                  <div className="demo-summary-line"><span>Vyzvednutí</span><strong>{activeDay ? formatPickupSummary(activeDay, activeTime) : activeTime}</strong></div>
-                  <p className="pickup-instruction">U výdeje řekni kód. Tašku máš připravenou, do minuty jsi venku.</p>
-                  <button className="demo-next demo-wide" onClick={startPickup}>Jsem u výdeje <ArrowRight size={16} /></button>
-                </div>}
-
-                {stage === 'pickup' && <div className="demo-content demo-centered pickup-running">
-                  <div className="demo-step-title"><span>KROK 5 Z 5</span><h3>Vyzvednutí</h3><p>Takto proběhne tvoje minuta na místě.</p></div>
-                  <div className="countdown-face" style={{ '--timer-progress': `${Math.min(100, (elapsed / 8000) * 100)}%` } as React.CSSProperties}><span>{timerLabel}</span><small>NA MÍSTĚ</small></div>
-                  <ol className="pickup-checklist"><li className={elapsed >= 0 ? 'check-active' : ''}><span><Check size={13} /></span>Taška je připravená předem</li><li className={elapsed >= 2600 ? 'check-active' : ''}><span><Check size={13} /></span>Kontrola kódu <b>{code}</b></li><li className={elapsed >= 5200 ? 'check-active' : ''}><span><Check size={13} /></span>Předání tašky</li></ol>
-                </div>}
-
-                {stage === 'done' && <div className="demo-content demo-centered demo-finished">
-                  <span className="done-check"><Check size={25} /></span><div className="demo-step-title"><span>HOTOVO</span><h3>Hotovo, tolik času ti nákup zabral na místě.</h3><p>V ukázce to bylo {timerLabel}. Skutečným cílem je vejít se do minuty.</p></div>
-                  <a className="demo-next demo-wide demo-cta-link" href="#zajemci">Chci to zkusit naostro <ArrowRight size={16} /></a>
-                  <button className="demo-back" onClick={beginAgain}>Začít znovu</button>
-                </div>}
-              </div>
-              <span className="phone-home" aria-hidden="true" />
+        <section className="how-section wrap" id="jak-to-funguje" aria-labelledby="how-title">
+          <div className="how-copy">
+            <span className="section-label">JAK TO FUNGUJE</span>
+            <h2 id="how-title">Čtyři kroky. Poslední trvá minutu.</h2>
+            <ol className="how-steps">
+              {steps.map((step, index) => (
+                <li key={step.title}><span aria-hidden="true">{index + 1}</span><div><strong>{t(step.title)}</strong><p>{t(step.text)}</p></div></li>
+              ))}
+            </ol>
+            <p className="how-note">{t('Ovoce a zelenina na kusy nebo v balení. Cenu znáš předem, nic se nedoplácí.')}</p>
+          </div>
+          <div className="how-visual">
+            <div className="order-tag" role="img" aria-label="Štítek objednávky: Nováková, výdej dnes v 17:00, 24 položek, připraveno">
+              <span className="order-tag-hole" aria-hidden="true" />
+              <span className="order-tag-check" aria-hidden="true"><Check size={18} strokeWidth={3} /></span>
+              <strong aria-hidden="true">Nováková</strong>
+              <span className="order-tag-row" aria-hidden="true">Výdej dnes <b>17:00</b></span>
+              <span className="order-tag-row" aria-hidden="true">24 položek</span>
+              <span className="order-tag-ready" aria-hidden="true"><Check size={16} strokeWidth={3} /> Připraveno</span>
             </div>
           </div>
-          </details>
         </section>
 
-        <section className="goods-section" id="kde-a-kdy">
-          <div className="wrap goods-facts">
-            <h2 className="goods-facts-label section-label">NABÍDKA A VÝDEJ</h2>
-            <div className="goods-fact"><ShoppingBasket size={26} strokeWidth={1.8} aria-hidden="true" /><p><strong>~500</strong><span>věcí na každý den</span></p></div>
-            <div className="goods-fact"><Clock size={26} strokeWidth={1.8} aria-hidden="true" /><p><strong>Do 30 minut</strong><span>připravíme zboží skladem</span></p></div>
-          </div>
+        <section className="promises wrap" aria-label="Tři jistoty">
+          {promises.map((promise) => (
+            <article className="promise-card" key={promise.word}>
+              <s>{promise.word}</s>
+              <h3>{t(promise.title)}</h3>
+              <p>{t(promise.text)}</p>
+            </article>
+          ))}
+        </section>
+
+        <section className="facts-strip" id="kde-a-kdy" aria-label="Základní informace">
+          <ul className="wrap">
+            {facts.map(({ Icon, title, text }) => (
+              <li key={title}><Icon size={26} strokeWidth={1.8} aria-hidden="true" /><p><strong>{t(title)}</strong><span>{t(text)}</span></p></li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="why-section wrap" aria-labelledby="why-title">
+          <span className="section-label" id="why-title">PROČ TO DĚLÁM</span>
+          <figure>
+            <blockquote>
+              {t('Taky tě nebaví trávit půl večera v obchodě? Mě taky. Tak dělám obchod, do kterého bych chtěl chodit sám.')}
+            </blockquote>
+            <figcaption>Miroslav</figcaption>
+          </figure>
         </section>
 
         <section className="interest-section wrap" id="zajemci">
-          <div className="interest-copy"><span className="section-label">MYNUTA MÍŘÍ NA SLOVANY</span><h2>Buď u toho od začátku.</h2><p>Připravujeme výdejnu na Slovanech s cílem otevřít v lednu 2027. Nech nám e-mail — pošleme ti zprávu, jakmile potvrdíme adresu a datum otevření.</p></div>
-          <form className="interest-demo" onSubmit={handleInterestSubmit}>
-            <span className="demo-badge"><span /> Zpráva hned při otevření</span>
-            <label htmlFor="interest-email">Tvůj e-mail</label>
-            <input id="interest-email" type="email" value={interestEmail} onChange={(event) => setInterestEmail(event.target.value)} placeholder="ty@email.cz" aria-describedby="interest-note" required />
+          <div className="interest-copy"><span className="section-label">REGISTRACE</span><h2>{t('Do obchodu se dostaneš jako první.')}</h2><p>{t('Ceny ukážu, až budou na sto procent jisté, těsně před otevřením. Registrovaní dostanou odkaz do e-shopu dřív než ostatní. Otevření plánuju na leden 2027.')}</p></div>
+          <form className="interest-demo" onSubmit={handleInterestSubmit} noValidate>
+            <span className="demo-badge"><span /> Odkaz ti pošlu před otevřením</span>
+            <label htmlFor="interest-email">{t('Tvůj e-mail')}</label>
+            <input type="hidden" name="zdroj" value={source} />
+            <input
+              id="interest-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              value={interestEmail}
+              onChange={(event) => {
+                setInterestEmail(event.target.value)
+                if (interestState !== 'submitting') {
+                  setInterestState('idle')
+                  setInterestMessage('')
+                }
+              }}
+              placeholder="ty@email.cz"
+              aria-invalid={interestState === 'error'}
+              aria-describedby={interestMessage ? 'interest-feedback interest-note' : 'interest-note'}
+            />
             <div className="interest-actions">
-              <button type="submit" className="button-primary" disabled={interestState === 'submitting'}>{interestState === 'submitting' ? 'Odesílám…' : 'Jdu do toho'} <ArrowRight size={18} /></button>
+              <button type="submit" className="button-primary" disabled={interestState === 'submitting'} aria-busy={interestState === 'submitting'}>{interestState === 'submitting' ? 'Odesílám…' : 'Chci odkaz jako první'} <ArrowRight size={18} aria-hidden="true" /></button>
             </div>
-            {interestMessage && <small className={`interest-message ${interestState}`}>{interestMessage}</small>}
-            <small id="interest-note">Zápisem souhlasíš se zasíláním zpráv o otevření a novinkách MYNUTY. Souhlas můžeš kdykoli odvolat. Podrobnosti najdeš níže v častých otázkách.</small>
+            <small id="interest-feedback" role={interestState === 'error' ? 'alert' : 'status'} className={`interest-message ${interestState}`}>{interestMessage}</small>
+            <small id="interest-note">{t('E-mail použiju jen k odkazu na e-shop a novinkám Mynuty. Souhlas můžeš kdykoli odvolat.')}</small>
+            <details className="privacy-disclosure">
+              <summary>{t('Jak naložím s tvým e-mailem?')}<ChevronDown size={18} aria-hidden="true" /></summary>
+              <dl>
+                <div><dt>Kdo e-maily spravuje</dt><dd>{controllerName}, {contactLink}.</dd></div>
+                <div><dt>K čemu je použiju</dt><dd>{t('Pošlu ti odkaz do e-shopu před otevřením a občas zprávu o novinkách Mynuty. Nikomu je nepředám.')}</dd></div>
+                <div><dt>Jak dlouho je nechám</dt><dd>{t('Dokud se neodhlásíš. Pokud Mynuta neotevře, seznam smažu.')}</dd></div>
+                <div><dt>Jak se odhlásit</dt><dd>{t('Napiš na')} {contactLink} a e-mail smažu. Máš také právo na přístup k údajům, jejich opravu i výmaz a můžeš podat stížnost u Úřadu pro ochranu osobních údajů.</dd></div>
+              </dl>
+            </details>
           </form>
-        </section>
-
-        <section className="faq-section wrap">
-          <div className="section-heading"><span className="section-label">NA CO SE MOŽNÁ PTÁŠ</span><h2>Časté otázky</h2></div>
-          <div className="faq-list">{faqs.map(({ id, question, answer }) => <details key={question} id={id}><summary>{question}<ChevronDown size={18} /></summary><p>{answer}</p></details>)}</div>
         </section>
       </main>
 
-      <footer className="public-footer"><div className="wrap"><Brand /><span>Plzeň-Slovany · Otevření plánujeme na leden 2027 · {contactLink}</span><a href="#nahoru">Zpátky nahoru ↑</a></div></footer>
+      <footer className="public-footer"><div className="wrap"><Brand /><span>{t('Plzeň-Slovany · Plánované otevření: leden 2027')} · {contactLink}</span><a href="#nahoru">Zpátky nahoru ↑</a></div></footer>
     </div>
   )
 }

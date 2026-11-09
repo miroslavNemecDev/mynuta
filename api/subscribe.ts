@@ -1,3 +1,7 @@
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`)
+}
+
 export default async function handler(req: any, res: any) {
   console.log('Subscribe route hit', { method: req.method })
 
@@ -14,10 +18,12 @@ export default async function handler(req: any, res: any) {
     const rawBody = chunks.length > 0 ? Buffer.concat(chunks).toString('utf8') : ''
     const body = rawBody ? JSON.parse(rawBody) : {}
     const email = typeof body.email === 'string' ? body.email.trim() : ''
+    const zdrojRaw = typeof body.zdroj === 'string' ? body.zdroj.trim().toLowerCase() : ''
+    const zdroj = /^[a-z0-9_-]{1,40}$/.test(zdrojRaw) ? zdrojRaw : 'web'
 
-    console.log('Parsed payload', { email })
+    console.log('Parsed payload', { email, zdroj })
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
       return res.status(400).json({ error: 'Zadej platný e-mail.' })
     }
 
@@ -56,11 +62,12 @@ export default async function handler(req: any, res: any) {
       from: `"MYNUTA" <${emailFrom}>`,
       to: emailTo,
       replyTo: email,
-      subject: 'Přihlášení k novinkám – MYNUTA',
-      text: `Nové přihlášení k novinkám:\n\nE-mail: ${email}\n\nVytvořeno: ${new Date().toISOString()}`,
+      subject: `Přihlášení k novinkám – MYNUTA [zdroj: ${zdroj}]`,
+      text: `Nové přihlášení k novinkám:\n\nE-mail: ${email}\nZdroj: ${zdroj}\n\nVytvořeno: ${new Date().toISOString()}`,
       html: `
         <p><strong>Nové přihlášení k novinkám</strong></p>
-        <p><strong>E-mail:</strong> ${email}</p>
+        <p><strong>E-mail:</strong> ${escapeHtml(email)}</p>
+        <p><strong>Zdroj:</strong> ${zdroj}</p>
         <p><strong>Čas:</strong> ${new Date().toLocaleString('cs-CZ')}</p>
       `,
     })
