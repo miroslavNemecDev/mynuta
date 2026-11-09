@@ -384,11 +384,11 @@
 /* Nadpisy a citát bez osamoceného slova na posledním řádku */
 .public-site h1, .public-site h2, .public-site h3, .why-section blockquote { text-wrap: balance; }
 
-/* Taška a lístek: stejný kruh. Taška je v obrázku posunutá, proto zmenšení a posun podle jejího skutečného obrysu. */
+/* Taška a lístek: stejný kruh. Posun obrázku dává na střed kruhu střed nejmenší kružnice opsané tašce i se stínem, aby nic nevyčnívalo. */
 .public-site { --art-circle: clamp(300px, 30vw, 400px); }
 .hero-visual, .how-visual { width: var(--art-circle); max-width: 100%; aspect-ratio: 1; background: #e1e9d4; border-radius: 50%; }
 .hero-visual { position: relative; top: auto; right: auto; z-index: 1; display: block; height: auto; min-height: 0; margin: 0; justify-self: center; opacity: 1; pointer-events: auto; }
-.hero-bag-art { position: absolute; top: 50%; left: 50%; width: 126.2%; max-width: none; height: auto; max-height: none; margin: 0; transform: translate(-58.23%, -53.44%); }
+.hero-bag-art { position: absolute; top: 50%; left: 50%; width: 126.2%; max-width: none; height: auto; max-height: none; margin: 0; transform: translate(-53.75%, -55.15%); }
 
 @media (min-width: 801px) {
   .public-hero { min-height: 0; padding-block: 24px; }
