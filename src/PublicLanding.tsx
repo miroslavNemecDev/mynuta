@@ -3,7 +3,6 @@ import {
   ArrowDown,
   ArrowRight,
   CalendarDays,
-  Check,
   Clock,
   ChevronDown,
   MapPin,
@@ -23,7 +22,16 @@ function t(text: string) {
   return text
     .replace(/(?<=^|[\s(„])([kKsSvVzZoOuUaAiI]) /g, '$1\u00a0')
     .replace(/leden 2027/gi, (match) => match.replace(' ', '\u00a0'))
-    .replace(/\be-(mail|shop)/gi, 'e\u2011$1')
+    .replace(/\b(e)-(mail|shop)/gi, '$1\u2011$2')
+}
+
+// Stejn\u00e9 za\u0161krtnut\u00ed jako na \u0161t\u00edtku v obr\u00e1zku ta\u0161ky
+function TagCheck() {
+  return (
+    <svg viewBox="33.5 5.5 13 13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M37 12.2l2.2 2.2l4-4.6" />
+    </svg>
+  )
 }
 
 const contactEmail = 'info@mynuta.cz'
@@ -194,11 +202,11 @@ function PublicLanding() {
           <div className="how-visual">
             <div className="order-tag" role="img" aria-label="Štítek objednávky: Nováková, výdej dnes v 17:00, 24 položek, připraveno">
               <span className="order-tag-hole" aria-hidden="true" />
-              <span className="order-tag-check" aria-hidden="true"><Check size={18} strokeWidth={3} /></span>
+              <span className="order-tag-check" aria-hidden="true"><TagCheck /></span>
               <strong aria-hidden="true">Nováková</strong>
               <span className="order-tag-row" aria-hidden="true">Výdej dnes <b>17:00</b></span>
               <span className="order-tag-row" aria-hidden="true">24 položek</span>
-              <span className="order-tag-ready" aria-hidden="true"><Check size={16} strokeWidth={3} /> Připraveno</span>
+              <span className="order-tag-ready" aria-hidden="true"><TagCheck /> Připraveno</span>
             </div>
           </div>
         </section>
@@ -257,22 +265,22 @@ function PublicLanding() {
             <div className="interest-actions">
               <button type="submit" className="button-primary" disabled={interestState === 'submitting'} aria-busy={interestState === 'submitting'}>{interestState === 'submitting' ? 'Odesílám…' : 'Chci odkaz jako první'} <ArrowRight size={18} aria-hidden="true" /></button>
             </div>
-            <small id="interest-feedback" role={interestState === 'error' ? 'alert' : 'status'} className={`interest-message ${interestState}`}>{interestMessage}</small>
+            <small id="interest-feedback" role={interestState === 'error' ? 'alert' : 'status'} className={`interest-message ${interestState}`}>{t(interestMessage)}</small>
             <small id="interest-note">{t('E-mail použiju jen k odkazu na e-shop a novinkám Mynuty. Souhlas můžeš kdykoli odvolat.')}</small>
             <details className="privacy-disclosure">
               <summary>{t('Jak naložím s tvým e-mailem?')}<ChevronDown size={18} aria-hidden="true" /></summary>
               <dl>
-                <div><dt>Kdo e-maily spravuje</dt><dd>{controllerName}, {contactLink}.</dd></div>
+                <div><dt>{t('Kdo e-maily spravuje')}</dt><dd>{controllerName}, {contactLink}.</dd></div>
                 <div><dt>K čemu je použiju</dt><dd>{t('Pošlu ti odkaz do e-shopu před otevřením a občas zprávu o novinkách Mynuty. Nikomu je nepředám.')}</dd></div>
                 <div><dt>Jak dlouho je nechám</dt><dd>{t('Dokud se neodhlásíš. Pokud Mynuta neotevře, seznam smažu.')}</dd></div>
-                <div><dt>Jak se odhlásit</dt><dd>{t('Napiš na')} {contactLink} a e-mail smažu. Máš také právo na přístup k údajům, jejich opravu i výmaz a můžeš podat stížnost u Úřadu pro ochranu osobních údajů.</dd></div>
+                <div><dt>Jak se odhlásit</dt><dd>{t('Napiš na')} {contactLink} {t('a e-mail smažu. Máš také právo na přístup k údajům, jejich opravu i výmaz a můžeš podat stížnost u Úřadu pro ochranu osobních údajů.')}</dd></div>
               </dl>
             </details>
           </form>
         </section>
       </main>
 
-      <footer className="public-footer"><div className="wrap"><Brand /><span>{t('Plzeň-Slovany · Plánované otevření: leden 2027')} · {contactLink}</span><a href="#nahoru">Zpátky nahoru ↑</a></div></footer>
+      <footer className="public-footer"><div className="wrap"><Brand /><span className="footer-info"><span>{t('Plzeň-Slovany')}</span><span className="footer-sep" aria-hidden="true">{' · '}</span><span>{t('Plánované otevření: leden 2027')}</span><span className="footer-sep" aria-hidden="true">{' · '}</span>{contactLink}</span><a href="#nahoru">Zpátky nahoru ↑</a></div></footer>
     </div>
   )
 }

@@ -33,8 +33,7 @@
 @media (max-width: 560px) {
   .wrap { width: calc(100% - 32px); }.public-header-inner { width: calc(100% - 26px); }
   .public-hero { display: block; padding-top: 30px; }.hero-eyebrow { font-size: 8px; }.hero-copy h1 { max-width: 440px; margin: 12px 0 10px; font-size: clamp(31px, 9vw, 40px); line-height: 1.1; }.hero-copy > p { max-width: 430px; font-size: 12px; }.hero-visual { display: none; }
-  .interest-section { display: block; padding-top: 48px; padding-bottom: 45px; }.interest-copy p { font-size: 11px; }.interest-demo { margin-top: 19px; padding: 14px; }.public-footer > div { flex-wrap: wrap; }.public-footer > div > span { order: 3; width: 100%; }.public-footer > div > a:last-child { margin-left: auto; }
-}
+  .interest-section { display: block; padding-top: 48px; padding-bottom: 45px; }.interest-copy p { font-size: 11px; }.interest-demo { margin-top: 19px; padding: 14px; }}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
@@ -195,8 +194,6 @@
 @media (max-width: 560px) { .hero-copy > .hero-subline { font-size: clamp(21px, 6vw, 26px); } }
 .hero-copy > p { max-width: 500px; font-size: 17px; line-height: 1.65; }
 .hero-eyebrow { color: #526b55; }
-.hero-visual { min-height: 390px; overflow: hidden; background: radial-gradient(ellipse at 50% 58%, #d7e3c9 0, #e1e9d4 52%, transparent 53%); border-radius: 50%; }
-.hero-bag-art { width: min(100%, 430px); }
  .interest-copy h2 { font-family: Georgia, 'Times New Roman', serif; font-weight: 500; letter-spacing: -.025em; }
 .interest-section { gap: 56px; padding-top: 76px; padding-bottom: 76px; }
 .interest-copy h2 { font-size: clamp(32px, 4vw, 46px); }
@@ -211,8 +208,6 @@
   .public-header-inner { width: calc(100% - 32px); height: 76px; }
   .public-hero { grid-template-columns: minmax(0, 1fr) minmax(220px, .75fr); gap: 16px; min-height: 0; padding: 31px 25px; border-radius: 23px; }
   .hero-copy h1 { font-size: clamp(38px, 6vw, 52px); }
-  .hero-visual { min-height: 260px; }
-  .hero-bag-art { width: min(100%, 300px); }
 }
 
 @media (max-width: 560px) {
@@ -225,19 +220,20 @@
   .hero-eyebrow { font-size: 10px; }
   .hero-copy h1 { margin: 15px 0 12px; font-size: clamp(36px, 10vw, 47px); line-height: 1.04; }
   .hero-copy > p { font-size: 15px; line-height: 1.55; }
-  .hero-visual { min-height: 0; height: 210px; margin-top: 5px; }
-  .hero-bag-art { width: min(78vw, 250px); max-height: 210px; }
-  .interest-section { gap: 18px; padding-top: 42px; padding-bottom: 42px; }
+  .interest-section { padding-top: 42px; padding-bottom: 42px; }
   .interest-copy .section-label { font-size: 10px; }
   .interest-copy h2 { margin: 8px 0; font-size: 30px; line-height: 1.08; }
   .interest-copy p { margin-bottom: 0; font-size: 14px; line-height: 1.55; }
-  .interest-demo { margin: 0; padding: 17px; border-radius: 15px; }
+  .interest-demo { margin: var(--block-gap) 0 0; padding: 17px; border-radius: 15px; }
   .interest-demo label { font-size: 13px; }
   .interest-demo input { height: 48px; }
   .interest-demo .button-primary { width: 100%; min-height: 48px; }
   .privacy-disclosure summary { min-height: 48px; font-size: 12px; }
   .privacy-disclosure p { font-size: 12px; }
-  .public-footer .wrap { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+  .public-footer .wrap { display: flex; flex-direction: column; align-items: center; gap: 0; text-align: center; }
+  .public-footer .footer-info { display: flex; flex-direction: column; align-items: center; }
+  .public-footer .footer-sep { display: none; }
+  .public-footer .public-brand, .public-footer .footer-info > span:not(.footer-sep), .public-footer .footer-info > a, .public-footer .wrap > a:last-child { display: flex; min-height: 44px; align-items: center; justify-content: center; }
 }
 
 /* Krok 1 rozdělený na A (nahoře) a B (dole) */
@@ -301,7 +297,7 @@
 #zajemci { scroll-margin-top: 110px; }
 
 /* Jak to funguje */
-.how-section { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(240px, .85fr); align-items: center; gap: clamp(32px, 6vw, 80px); padding-block: 88px 64px; }
+.how-section { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(240px, .85fr); align-items: center; gap: var(--block-gap); padding-block: 88px 64px; }
 .how-copy h2 { margin: 12px 0 26px; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(30px, 3.6vw, 44px); font-weight: 500; letter-spacing: -.025em; line-height: 1.1; }
 .how-steps { display: grid; margin: 0; padding: 0; list-style: none; }
 .how-steps li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 18px; padding: 18px 0; border-top: 1px solid var(--public-line); }
@@ -310,16 +306,18 @@
 .how-steps strong { display: block; font-family: Manrope, sans-serif; font-size: 19px; font-weight: 750; line-height: 1.3; }
 .how-steps p { margin: 4px 0 0; color: var(--public-muted); font-size: 16px; line-height: 1.55; }
 .how-note { margin: 14px 0 0; padding-top: 16px; color: #718078; border-top: 1px solid var(--public-line); font-size: 14px; line-height: 1.55; }
-.how-visual { display: grid; width: 100%; max-width: 440px; aspect-ratio: 1; place-items: center; justify-self: center; background: radial-gradient(circle, #e1e9d4 0, #e1e9d4 62%, transparent 63%); }
+.how-visual { display: grid; place-items: center; justify-self: center; }
 
-/* Štítek objednávky ve stejném stylu jako štítek na tašce v hero */
-.order-tag { position: relative; display: grid; width: min(76%, 310px); gap: 9px; padding: 34px 26px 24px; background: #fff; border-radius: 14px; box-shadow: 0 22px 44px rgba(37, 52, 42, .17), 0 2px 6px rgba(37, 52, 42, .1); transform: rotate(-6deg); }
-.order-tag-hole { position: absolute; top: 14px; left: 16px; width: 14px; height: 14px; background: #e6eae2; border-radius: 50%; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .2); }
-.order-tag-check { position: absolute; top: 12px; right: 14px; display: grid; width: 28px; height: 28px; place-items: center; color: #fff; background: #2e9b4a; border-radius: 50%; }
-.order-tag strong { margin-top: 12px; color: #1f2d24; font-family: Manrope, sans-serif; font-size: 32px; font-weight: 800; line-height: 1.1; }
-.order-tag-row { display: flex; align-items: center; gap: 10px; color: #647367; font-size: 16px; }
-.order-tag-row b { padding: 3px 13px; color: #fff; background: #f5a00c; border-radius: 999px; font-size: 17px; font-weight: 800; }
-.order-tag-ready { display: inline-flex; width: fit-content; align-items: center; gap: 6px; margin-top: 8px; padding: 8px 14px 8px 11px; color: #2b7a45; background: #edf7ec; border-radius: 10px; font-size: 16px; font-weight: 700; }
+/* Štítek objednávky: barvy, otvor a zaškrtnutí podle štítku v obrázku tašky. Rozměry v em rostou s kruhem. */
+.order-tag { position: relative; display: grid; width: 16.5em; justify-items: center; gap: .5em; padding: 2.5em 1em 1.1em; background: #fff; border: 1px solid #e3e8e0; border-radius: 1.1em; box-shadow: .4em .55em 0 rgba(20, 83, 45, .14); font-size: calc(var(--art-circle) * .04); transform: rotate(-7deg); }
+.order-tag-hole { position: absolute; top: .8em; left: 50%; width: 1.5em; height: 1.5em; margin-left: -.75em; background: #f6f7f4; border: .28em solid #e3e8e0; border-radius: 50%; }
+.order-tag-check { position: absolute; top: .87em; right: .87em; display: block; width: 2.06em; height: 2.06em; color: #fff; background: #2e9b4a; border-radius: 50%; }
+.order-tag-check svg { display: block; width: 100%; height: 100%; }
+.order-tag strong { color: #1e2b24; font-family: Manrope, sans-serif; font-size: 2em; font-weight: 800; line-height: 1.1; }
+.order-tag-row { display: flex; align-items: center; gap: .6em; color: #5b6660; }
+.order-tag-row b { padding: .18em .75em; color: #fff; background: #ff9e1b; border-radius: 999px; font-size: 1.06em; font-weight: 800; }
+.order-tag-ready { display: inline-flex; align-items: center; gap: .3em; margin-top: .3em; padding: .4em .85em .4em .55em; color: #2b7a45; background: #edf7ec; border-radius: .6em; font-weight: 700; }
+.order-tag-ready svg { width: 1.5em; height: 1.5em; }
 
 /* Tři jistoty */
 .promises { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
@@ -359,7 +357,7 @@
 @media (prefers-reduced-motion: reduce) { .hero-title-location, .hero-copy > .hero-subline { animation: none; } }
 
 /* Jednotný svislý rytmus: mezera mezi sekcemi je stejná všude, včetně citátu i patičky */
-.public-site { --section-gap: clamp(56px, 7vw, 80px); }
+.public-site { --section-gap: clamp(56px, 7vw, 80px); --block-gap: clamp(32px, 6vw, 80px); }
 .how-section, .promises, .facts-strip, .why-section, .interest-section, .public-footer { margin-top: var(--section-gap); }
 .how-section, .promises, .why-section, .interest-section { padding-block: 0; }
 
@@ -368,7 +366,6 @@
 }
 @media (max-width: 800px) {
   .how-section { grid-template-columns: 1fr; }
-  .how-visual { max-width: 340px; }
   .promises { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) {
@@ -377,5 +374,27 @@
   .promise-card { padding: 22px; }
   .facts-strip ul { grid-template-columns: 1fr; }
   .public-site .hero-cta { font-size: 15px; }
+}
+
+/* Nadpisy a citát bez osamoceného slova na posledním řádku */
+.public-site h1, .public-site h2, .public-site h3, .why-section blockquote { text-wrap: balance; }
+
+/* Taška a lístek: stejný kruh. Taška je v obrázku posunutá, proto zmenšení a posun podle jejího skutečného obrysu. */
+.public-site { --art-circle: clamp(300px, 30vw, 400px); }
+.hero-visual, .how-visual { width: var(--art-circle); max-width: 100%; aspect-ratio: 1; background: #e1e9d4; border-radius: 50%; }
+.hero-visual { position: relative; top: auto; right: auto; z-index: 1; display: block; height: auto; min-height: 0; margin: 0; justify-self: center; opacity: 1; pointer-events: auto; }
+.hero-bag-art { position: absolute; top: 50%; left: 50%; width: 126.2%; max-width: none; height: auto; max-height: none; margin: 0; transform: translate(-58.23%, -53.44%); }
+
+@media (min-width: 801px) {
+  .public-hero { min-height: 0; padding-block: 24px; }
+  .how-section { margin-top: 44px; }
+}
+@media (max-width: 800px) {
+  .public-site { --art-circle: 240px; }
+  .public-hero { grid-template-columns: minmax(0, 1fr) minmax(240px, .75fr); }
+}
+@media (max-width: 560px) {
+  .public-site { --art-circle: min(300px, 100vw - 70px); }
+  .hero-visual { flex: none; align-self: center; margin-top: 14px; }
 }
 
