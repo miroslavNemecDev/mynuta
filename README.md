@@ -2,6 +2,21 @@
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
+## Local development
+
+Run `npm install`, copy `.env.example` to `.env`, and start the app with `npm run dev`.
+Vite serves the existing `/api/subscribe` endpoint locally as well as the frontend.
+Configure the SMTP values in `.env` to send real emails; without them, the endpoint
+returns an error when a valid email address is submitted.
+
+## 500-SKU mobile catalog test
+
+Open `/?prototyp=obchod&test-katalog=500` while the Vite dev server is running to
+load 500 synthetic products and a mobile-only horizontal sale carousel. Test
+catalog products, carts, orders, and discount settings use separate browser
+storage from the regular prototype. The generated prices, stock, and names are
+fictional; product photos reuse the existing sample images.
+
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)

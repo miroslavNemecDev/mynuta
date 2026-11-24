@@ -16,12 +16,11 @@ function publicAsset(filename: string) {
   return `${import.meta.env.BASE_URL}${filename}`
 }
 
-// Česká typografie: nezlomitelná mezera za jednopísmenými předložkami a spojkami i v „leden 2027“,
-// nezlomitelný spojovník v „e-mail“ a „e-shop“.
+// Česká typografie: nezlomitelná mezera za jednopísmenými předložkami a spojkami
+// a nezlomitelný spojovník v „e-mail“ a „e-shop“.
 function t(text: string) {
   return text
     .replace(/(?<=^|[\s(„])([kKsSvVzZoOuUaAiI]) /g, '$1\u00a0')
-    .replace(/leden 2027/gi, (match) => match.replace(' ', '\u00a0'))
     .replace(/\b(e)-(mail|shop)/gi, '$1\u2011$2')
 }
 
@@ -259,7 +258,7 @@ function PublicLanding() {
         </section>
 
         <section className="interest-section wrap" id="zajemci">
-          <div className="interest-copy"><span className="section-label">REGISTRACE</span><h2>{t('Do obchodu se dostaneš jako první.')}</h2><p>{t('Ceny ukážu, až budou na sto procent jisté, těsně před otevřením. Registrovaní dostanou odkaz do e-shopu dřív než ostatní. Otevření plánuju na leden 2027.')}</p></div>
+          <div className="interest-copy"><span className="section-label">REGISTRACE</span><h2>{t('Do obchodu se dostaneš jako první.')}</h2><p>{t('Ceny ukážu, až budou na sto procent jisté, těsně před otevřením. Registrovaní dostanou odkaz do e-shopu dřív než ostatní. O termínu otevření se dozvíš jako první.')}</p></div>
           <form className="interest-demo" onSubmit={handleInterestSubmit} noValidate>
             <span className="demo-badge"><span /> Odkaz ti pošlu před otevřením</span>
             <label htmlFor="interest-email">{t('Tvůj e-mail')}</label>
@@ -299,7 +298,7 @@ function PublicLanding() {
         </section>
       </main>
 
-      <footer className="public-footer"><div className="wrap"><Brand /><span className="footer-info"><span>{t('Plzeň-Slovany')}</span><span className="footer-sep" aria-hidden="true">{' · '}</span><span>{t('Plánované otevření: leden 2027')}</span><span className="footer-sep" aria-hidden="true">{' · '}</span>{contactLink}</span><a href="#nahoru">Zpátky nahoru ↑</a></div></footer>
+      <footer className="public-footer"><div className="wrap"><Brand /><span className="footer-info"><span>{t('Plzeň-Slovany')}</span><span className="footer-sep" aria-hidden="true">{' · '}</span>{contactLink}</span><a href="#nahoru">Zpátky nahoru ↑</a></div></footer>
     </div>
   )
 }
