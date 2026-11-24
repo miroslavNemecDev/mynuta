@@ -280,6 +280,9 @@
     0 50%
   );
 }
+/* Vedle záložky je hlavička průhledná, kliky tam propadnou na obsah pod ní. Bílý tvar a logo klikací zůstávají. */
+.public-header { pointer-events: none; }
+.public-header::before, .public-header .public-brand { pointer-events: auto; }
 .public-header .public-header-inner { display: flex; width: 100%; height: var(--nav-h); align-items: center; justify-content: center; }
 .public-header .public-brand { gap: 4px; padding: 0; }
 .public-header .public-brand img { width: 176px; height: 56px; object-fit: contain; }

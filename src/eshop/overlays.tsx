@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type RefObject } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from 'react'
 import { Check, ChevronLeft, ChevronRight, Minus, Plus, X } from 'lucide-react'
 import { categoryById, inStockFirst, priceOf, productById, recipeById, recipesUsing, subById, type Category } from './catalog.ts'
 import { PriceTag, ProductCard, RecipeArt, RecipeCard, Shelf, Sheet, Stepper, Thumb } from './components.tsx'
@@ -390,16 +390,56 @@ export function ProductSheet({ id }: { id: string }) {
   )
 }
 
+const STRIP_MS = 5000
+const STRIP_TICK = 100
+
+/**
+ * Za 5 s se pruh sám zavře, aby nepřekážel u každého zboží. Odpočet stojí, dokud je nad pruhem myš
+ * nebo v něm fokus, a po každém ťuknutí do pruhu (třeba přidání návrhu) začne znovu.
+ */
+function useAutoClose(onClose: () => void) {
+  const [left, setLeft] = useState(STRIP_MS)
+  const [paused, setPaused] = useState(false)
+  const closeRef = useRef(onClose)
+  useEffect(() => { closeRef.current = onClose })
+  useEffect(() => {
+    if (paused) return
+    if (left <= 0) { closeRef.current(); return }
+    const timer = window.setTimeout(() => setLeft((value) => value - STRIP_TICK), STRIP_TICK)
+    return () => window.clearTimeout(timer)
+  }, [left, paused])
+  return { left, setPaused, restart: () => setLeft(STRIP_MS) }
+}
+
 export function SuggestionStrip({ sourceId, ids, onClose }: { sourceId: string; ids: string[]; onClose: () => void }) {
   const shop = useShop()
+  const { left, setPaused, restart } = useAutoClose(onClose)
   const source = productById.get(sourceId)
   if (!source) return null
   return (
-    <aside className="es-strip" aria-label="K tomu lidé berou">
+    <aside
+      className="es-strip"
+      aria-label="K tomu lidé berou"
+      onPointerEnter={(event) => { if (event.pointerType === 'mouse') setPaused(true) }}
+      onPointerLeave={(event) => { if (event.pointerType === 'mouse') setPaused(false) }}
+      onPointerDown={restart}
+      onFocus={() => setPaused(true)}
+      onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false) }}
+    >
       <div className="es-strip-inner">
         <div className="es-strip-head">
-          <span><Check size={16} strokeWidth={2.8} /> {nb(`${source.name} je v tašce`)}</span>
-          <button type="button" className="es-icon-button" onClick={onClose} aria-label="Zavřít návrhy"><X size={18} strokeWidth={2.4} /></button>
+          {/* „V tašce: …“ sedí na jednotné i množné číslo (chléb i banány). */}
+          <span><Check size={16} strokeWidth={2.8} /> <span className="es-strip-title">{nb(`V tašce: ${source.name}`)}</span></span>
+          <button
+            type="button"
+            className="es-strip-timer"
+            onClick={onClose}
+            aria-label="Zavřít návrhy"
+            style={{ '--es-left': left / STRIP_MS } as CSSProperties}
+          >
+            <span aria-hidden="true">Zavřít · {Math.max(1, Math.ceil(left / 1000))}&nbsp;s</span>
+            <X size={18} strokeWidth={2.4} aria-hidden="true" />
+          </button>
         </div>
         <p className="es-strip-label">K tomu lidé berou</p>
         <div className="es-strip-items">

@@ -297,7 +297,11 @@ html.es-locked, html.es-locked body { overflow: hidden; }
 .es-strip-inner { padding: 8px 10px 12px 14px; background: var(--es-card); border: 1px solid var(--es-card-line); border-radius: 20px; box-shadow: 0 12px 30px rgba(38, 55, 44, .18); }
 .es-strip-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--es-green-deep); font-size: 13px; font-weight: 700; }
 .es-strip-head > span { display: flex; min-width: 0; align-items: center; gap: 6px; }
-.es-strip-head .es-icon-button { width: 36px; height: 36px; margin-right: -4px; }
+.es-strip-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Tlačítko s odpočtem: zelená výplň ubývá zprava doleva, po 5 s se pruh zavře. */
+.es-strip-timer { position: relative; display: flex; overflow: hidden; height: 36px; flex: none; align-items: center; gap: 6px; margin-right: -4px; padding: 0 10px 0 14px; color: var(--es-green-deep); background: var(--es-soft); border: 0; border-radius: 999px; font-family: var(--es-num); font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; isolation: isolate; }
+.es-strip-timer::before { position: absolute; z-index: -1; inset: 0; background: #d9e6cf; transform: scaleX(var(--es-left, 1)); transform-origin: left; transition: transform .1s linear; content: ''; }
+.es-strip-timer:hover { background: #e2e8d6; }
 .es-strip-label { margin: 0 0 8px; font-family: var(--es-serif); font-size: 17px; }
 .es-strip-items { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .es-mini { position: relative; display: flex; min-width: 0; min-height: 76px; flex-direction: column; padding: 8px; background: #fff; border: 1px solid var(--es-line); border-radius: 14px; }
@@ -465,7 +469,11 @@ html.es-locked, html.es-locked body { overflow: hidden; }
 @media (min-width: 1024px) {
   .es { --es-col: 1320px; --es-card-w: 168px; --es-recipe-w: 250px; --es-bar-h: 0px; max-width: none; padding-bottom: 48px; }
   .es.has-chipbar { --es-bar-h: 0px; }
-  .es-header { --nav-h: 92px; --nav-w: 100px; --nav-slope: 72px; }
+  /* Vedle záložky je hlavička průhledná, zboží pod ní prosvítá až k výřezu; kliky tam propadnou na obsah. */
+  .es-header { --nav-h: 92px; --nav-w: 100px; --nav-slope: 72px; background: transparent; pointer-events: none; }
+  .es-header-shape::before { pointer-events: auto; }
+  .es-brand, .es-header-tools, .es-header-right { pointer-events: auto; }
+  .es-brand { width: max-content; margin: 0 auto; }
   .es-brand img { width: 176px; height: 56px; }
   .es-brand span { font-size: 11px; }
   .es-header-tools { display: flex; left: max(16px, calc((100% - 1320px) / 2 + 16px)); }
