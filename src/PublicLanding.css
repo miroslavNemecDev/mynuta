@@ -1,4 +1,4 @@
-.public-site { --public-ink: #25342a; --public-muted: #718078; --public-green: #119e55; --public-deep: #0a7e43; --public-orange: #f4a000; --public-line: #e4e9e3; min-height: 100vh; overflow: hidden; color: var(--public-ink); background: #f6f7f4; }
+.public-site { --public-ink: #25342a; --public-muted: #718078; --public-green: #119e55; --public-deep: #0a7e43; --public-orange: #f4a000; --public-line: #e4e9e3; min-height: 100vh; overflow-x: clip; color: var(--public-ink); background: #f6f7f4; }
 .public-site a { color: inherit; text-decoration: none; }
 .public-site button, .public-site input { font: inherit; }
 .public-site button { cursor: pointer; }
