@@ -52,8 +52,9 @@ html.es-locked, html.es-locked body { overflow: hidden; }
   z-index: 30;
   top: 0;
   height: var(--nav-h);
-  /* Plochy vedle výřezu jsou v barvě pozadí, aby pod nimi při scrollu neprosvítalo zboží. */
-  background: var(--es-bg);
+  /* Vedle záložky je hlavička průhledná: zboží pod ní prosvítá až k výřezu a kliky tam propadnou na obsah. */
+  background: transparent;
+  pointer-events: none;
 }
 .es-header-shape {
   position: absolute;
@@ -62,6 +63,7 @@ html.es-locked, html.es-locked body { overflow: hidden; }
   pointer-events: none;
 }
 .es-header-shape::before {
+  pointer-events: auto;
   position: absolute;
   inset: 0;
   background: #fffdf8;
@@ -89,7 +91,18 @@ html.es-locked, html.es-locked body { overflow: hidden; }
   );
   content: '';
 }
-.es-brand { position: relative; z-index: 1; display: flex; height: 100%; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #526b55; text-decoration: none; }
+/* Bílý pruh pokračuje do stran až k okrajům okna, i když je e-shop užší sloupec uprostřed.
+   border-image s přesahem se jen vykreslí, nerozšíří stránku ani neposune záložku ze středu. */
+.es-header-shape::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 50%;
+  border-image: linear-gradient(#fffdf8 0 0) fill 0 / 0 / 0 100vw;
+  content: '';
+}
+.es-brand { position: relative; z-index: 1; display: flex; width: max-content; height: 100%; margin: 0 auto; pointer-events: auto; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #526b55; text-decoration: none; }
 .es-brand img { display: block; width: 126px; height: 40px; object-fit: contain; }
 .es-brand span { font-size: 9px; font-weight: 700; letter-spacing: .04em; }
 .es-header { transition: transform .28s cubic-bezier(.2, .8, .2, 1); }
@@ -100,12 +113,12 @@ html.es-locked, html.es-locked body { overflow: hidden; }
   .es-header.is-compact .es-brand img { opacity: 0; }
 }
 /* Nástroje v bílém pruhu hlavičky: šipka zpět jen s myší (telefon má vlastní zpět), hledání jen na počítači. */
-.es-header-tools { position: absolute; z-index: 1; top: 0; left: calc(var(--es-gutter) - 8px); display: none; height: 50%; align-items: center; gap: 8px; }
+.es-header-tools { position: absolute; z-index: 1; pointer-events: auto; top: 0; left: calc(var(--es-gutter) - 8px); display: none; height: 50%; align-items: center; gap: 8px; }
 .es-header-back { display: flex; height: 36px; align-items: center; padding: 0 8px; color: var(--es-green-deep); background: none; border: 0; border-radius: 8px; }
 .es-header-back:hover { background: var(--es-soft); }
 .es-header-search { display: none; width: 300px; height: 36px; align-items: center; gap: 8px; padding: 0 14px; color: var(--es-muted); background: var(--es-bg); border: 1px solid #dfe3d4; border-radius: 999px; font-size: 14px; text-align: left; }
 .es-header-search:hover { border-color: #b9cdb1; }
-.es-header-right { position: absolute; z-index: 1; top: 0; right: max(16px, calc((100% - 1320px) / 2 + 16px)); display: none; height: 50%; align-items: center; }
+.es-header-right { position: absolute; z-index: 1; pointer-events: auto; top: 0; right: max(16px, calc((100% - 1320px) / 2 + 16px)); display: none; height: 50%; align-items: center; }
 .es-header-bag { position: relative; display: flex; height: 36px; align-items: center; gap: 8px; padding: 0 16px 0 12px; color: #fff; background: var(--es-green); border: 0; border-radius: 999px; font-family: var(--es-num); font-size: 14px; font-weight: 800; }
 .es-header-bag:hover { background: var(--es-green-deep); }
 .es-header-bag .es-icon { color: #fff; --es-icon-accent: #f6c66a; }
@@ -469,11 +482,7 @@ html.es-locked, html.es-locked body { overflow: hidden; }
 @media (min-width: 1024px) {
   .es { --es-col: 1320px; --es-card-w: 168px; --es-recipe-w: 250px; --es-bar-h: 0px; max-width: none; padding-bottom: 48px; }
   .es.has-chipbar { --es-bar-h: 0px; }
-  /* Vedle záložky je hlavička průhledná, zboží pod ní prosvítá až k výřezu; kliky tam propadnou na obsah. */
-  .es-header { --nav-h: 92px; --nav-w: 100px; --nav-slope: 72px; background: transparent; pointer-events: none; }
-  .es-header-shape::before { pointer-events: auto; }
-  .es-brand, .es-header-tools, .es-header-right { pointer-events: auto; }
-  .es-brand { width: max-content; margin: 0 auto; }
+  .es-header { --nav-h: 92px; --nav-w: 100px; --nav-slope: 72px; }
   .es-brand img { width: 176px; height: 56px; }
   .es-brand span { font-size: 11px; }
   .es-header-tools { display: flex; left: max(16px, calc((100% - 1320px) / 2 + 16px)); }
