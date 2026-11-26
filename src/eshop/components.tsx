@@ -81,11 +81,21 @@ export function Shelf({ title, count, action, wide = false, children }: {
 }) {
   const railRef = useRef<HTMLDivElement>(null)
   const [edges, setEdges] = useState({ start: true, end: false })
-  // Šipky jsou jen pro myš. Stav se zjišťuje při najetí a scrollu, ne v efektu.
+  // Šipky jsou jen pro myš a jsou vidět pořád. Kraje se zjišťují hned po vykreslení, při změně šířky a při scrollu,
+  // takže u řady, která se celá vejde, se šipka vůbec neukáže.
   const updateEdges = () => {
     const rail = railRef.current
     if (rail) setEdges({ start: rail.scrollLeft <= 4, end: rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 4 })
   }
+  useEffect(() => {
+    const rail = railRef.current
+    if (!rail) return
+    const measure = () => setEdges({ start: rail.scrollLeft <= 4, end: rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 4 })
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(rail)
+    return () => observer.disconnect()
+  }, [children])
   const page = (direction: 1 | -1) => {
     const rail = railRef.current
     rail?.scrollBy({ left: direction * rail.clientWidth * 0.85, behavior: 'smooth' })
@@ -96,7 +106,7 @@ export function Shelf({ title, count, action, wide = false, children }: {
         <h2>{title}{count !== undefined && <small>{count}</small>}</h2>
         {action && <button type="button" className="es-link" onClick={action.onClick}>{action.label}<ChevronRight size={16} strokeWidth={2.4} /></button>}
       </div>
-      <div className="es-rail-wrap" onMouseEnter={updateEdges}>
+      <div className="es-rail-wrap">
         {!edges.start && <button type="button" className="es-rail-arrow is-prev" onClick={() => page(-1)} aria-label="Posunout doleva" tabIndex={-1}><ChevronLeft size={22} strokeWidth={2.4} /></button>}
         <div ref={railRef} className={`es-rail${wide ? ' es-rail-wide' : ''}`} onScroll={updateEdges}>{children}</div>
         {!edges.end && <button type="button" className="es-rail-arrow is-next" onClick={() => page(1)} aria-label="Posunout doprava" tabIndex={-1}><ChevronRight size={22} strokeWidth={2.4} /></button>}

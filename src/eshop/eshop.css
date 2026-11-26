@@ -15,9 +15,9 @@
   --es-gutter: 16px;
   --es-gap: 8px;
   --es-vw: min(100vw, var(--es-col));
-  /* Na řádku vždy 3 karty a kus čtvrté, aby bylo jasné, že pruh jde posunout. */
-  --es-card-w: calc((var(--es-vw) - var(--es-gutter) - 3 * var(--es-gap)) / 3.3);
-  --es-recipe-w: calc((var(--es-vw) - var(--es-gutter) - 2 * var(--es-gap)) / 2.3);
+  /* Na řádku vždy 3 karty a necelá polovina čtvrté, aby bylo jasné, že pruh jde posunout. */
+  --es-card-w: calc((var(--es-vw) - var(--es-gutter) - 3 * var(--es-gap)) / 3.4);
+  --es-recipe-w: calc((var(--es-vw) - var(--es-gutter) - 2 * var(--es-gap)) / 2.4);
   --es-bar-h: 69px;
   --es-serif: Georgia, 'Times New Roman', serif;
   --es-num: Manrope, 'DM Sans', sans-serif;
@@ -162,12 +162,12 @@ html.es-locked, html.es-locked body { overflow: hidden; }
 .es-rail-wrap { position: relative; }
 .es-rail-arrow { display: none; }
 @media (hover: hover) and (pointer: fine) {
-  .es-rail-arrow { position: absolute; z-index: 3; top: calc(var(--es-card-w) * .41 - 22px); display: grid; width: 44px; height: 44px; place-items: center; padding: 0; color: var(--es-green-deep); background: #fff; border: 1px solid #dfe5d8; border-radius: 50%; box-shadow: 0 6px 16px rgba(33, 66, 42, .18); opacity: 0; transition: opacity .15s, transform .15s; }
+  /* Šipky jsou vidět pořád (ne až po najetí myší), aby bylo jasné, že řada pokračuje. */
+  .es-rail-arrow { position: absolute; z-index: 3; top: calc(var(--es-card-w) * .41 - 24px); display: grid; width: 48px; height: 48px; place-items: center; padding: 0; color: var(--es-green-deep); background: #fff; border: 1.5px solid #c9d6c2; border-radius: 50%; box-shadow: 0 8px 20px rgba(33, 66, 42, .26), 0 1px 3px rgba(33, 66, 42, .14); transition: transform .15s, background .15s, color .15s; }
   .es-rail-arrow.is-prev { left: -14px; }
   .es-rail-arrow.is-next { right: -14px; }
-  .es-rail-wrap:hover .es-rail-arrow { opacity: 1; }
-  .es-rail-arrow:hover { transform: scale(1.06); }
-  .es-rail-wide ~ .es-rail-arrow, .es-rail-wrap:has(.es-rail-wide) .es-rail-arrow { top: calc(var(--es-recipe-w) * .31 - 22px); }
+  .es-rail-arrow:hover { color: #fff; background: var(--es-green); border-color: var(--es-green); transform: scale(1.06); }
+  .es-rail-wide ~ .es-rail-arrow, .es-rail-wrap:has(.es-rail-wide) .es-rail-arrow { top: calc(var(--es-recipe-w) * .31 - 24px); }
 }
 .es-rail > * { flex: 0 0 var(--es-card-w); scroll-snap-align: start; }
 .es-rail-wide > * { flex-basis: var(--es-recipe-w); }
@@ -476,6 +476,29 @@ html.es-locked, html.es-locked body { overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
   .es *, .es *::before, .es *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* Tablet a zúžené okno na PC: obsah přes celou šířku okna, řady zboží jdou až k okraji a mřížky přidají sloupce.
+   Spodní lišta, detail zboží a hledání zůstávají úzké uprostřed (max-width: var(--es-col)). */
+@media (min-width: 600px) and (max-width: 1023px) {
+  /* Karty se dopočítají tak, aby z poslední byla vidět necelá polovina: 3,4 karty do 767 px, pak 4,4. */
+  .es { --es-gutter: 24px; --es-gap: 10px; --es-vw: 100vw; max-width: none; }
+  .es-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  /* 8 kategorií vyjde přesně na dvě řady po čtyřech, Recepty pod nimi jako široký pruh. */
+  .es-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .es-tile-recipes { min-height: 0; grid-column: 1 / -1; flex-direction: row; gap: 12px; padding: 10px 16px; }
+  .es-tile-recipes .es-tile-icon { width: 44px; height: 44px; }
+  .es-recipe-grid { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+  /* Pozadí spodní lišty přes celé okno, ovládání v ní zůstává 600 px uprostřed. */
+  .es-bottombar, .es-actionbar { max-width: none; padding-inline: max(var(--es-gutter), calc((100% - var(--es-col)) / 2 + var(--es-gutter))); }
+  /* Podkategorie ve spodní liště: začínají zarovnané s hledáním a posouvají se přes celou šířku okna. */
+  .es-bottombar { padding-inline: 0; }
+  .es-bottom-row { width: 100%; max-width: var(--es-col); margin: 0 auto; padding-inline: var(--es-gutter); }
+  .es-bottom-chips { --chips-pad: max(var(--es-gutter), calc((100% - var(--es-col)) / 2 + var(--es-gutter))); margin: -2px 0 0; padding-inline: var(--chips-pad); scroll-padding-inline: var(--chips-pad); }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .es { --es-card-w: calc((var(--es-vw) - var(--es-gutter) - 4 * var(--es-gap)) / 4.4); --es-recipe-w: calc((var(--es-vw) - var(--es-gutter) - 3 * var(--es-gap)) / 3.4); }
 }
 
 /* Počítač: tři sloupce. Vlevo kategorie, uprostřed zboží, vpravo taška. Hledání a detail jako okna uprostřed. */
