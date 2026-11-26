@@ -98,9 +98,19 @@ function readSourceParam() {
 function PublicLanding() {
   const [orderPlaces] = useState(shuffledOrderPlaces)
   const [orderPlace, setOrderPlace] = useState(0)
+  // Stránka otevřená na kartě na pozadí: úvodní animace počká, až se na kartu přepneš.
+  const [heroVisible, setHeroVisible] = useState(() => document.visibilityState === 'visible')
+
+  useEffect(() => {
+    if (heroVisible) return
+    const onVisible = () => { if (document.visibilityState === 'visible') setHeroVisible(true) }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [heroVisible])
 
   // Rotace začíná až po úvodní animaci, aby první místo bylo vidět celou dobu
   useEffect(() => {
+    if (!heroVisible) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     let interval: number | undefined
     const tick = () => setOrderPlace((place) => (place + 1) % orderPlaceNames.length)
@@ -112,7 +122,7 @@ function PublicLanding() {
       window.clearTimeout(start)
       window.clearInterval(interval)
     }
-  }, [])
+  }, [heroVisible])
   const [interestEmail, setInterestEmail] = useState('')
   const [interestState, setInterestState] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
   const [interestMessage, setInterestMessage] = useState('')
@@ -183,7 +193,7 @@ function PublicLanding() {
       </header>
 
       <main>
-        <section className="public-hero wrap" aria-labelledby="hero-title">
+        <section className={`public-hero wrap${heroVisible ? '' : ' hero-waiting'}`} aria-labelledby="hero-title">
           <div className="hero-copy">
             <span className="hero-eyebrow"><span /> VÝDEJNA POTRAVIN · PLZEŇ-SLOVANY</span>
             <h1 id="hero-title">

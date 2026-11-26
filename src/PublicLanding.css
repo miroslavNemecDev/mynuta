@@ -181,6 +181,8 @@
 @keyframes hero-strike { to { transform: rotate(-3deg) scaleX(1); } }
 @keyframes hero-reveal { from { opacity: 0; transform: translateY(16px) scale(.97); clip-path: inset(-10% 100% -10% 0); } to { opacity: 1; transform: none; clip-path: inset(-10% -3% -10% 0); } }
 @keyframes hero-mark { to { transform: rotate(-1.2deg) scaleX(1); } }
+/* Na kartě na pozadí stojí animace na začátku a rozběhnou se, až se na kartu přepneš. */
+.hero-waiting, .hero-waiting *, .hero-waiting *::before, .hero-waiting *::after { animation-play-state: paused !important; }
 @keyframes hero-fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
   .hero-title-line:last-child, .hero-title-struck s, .hero-copy > .hero-subline { animation: none; }
